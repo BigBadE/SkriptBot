@@ -27,6 +27,7 @@ public class DocSearchCommand implements ICommand {
     private static final String[] aliases = new String[]{"d", "doc", "docs", "documentation"};
     private static final String ARROW_LEFT = "U+20C0";
     private static final String ARROW_RIGHT = "U+25B6";
+    private static final String FOOTER = "Powered by skUnity Docs 2";
     private final ResourceDataFetcher dataFetcher;
 
     private static int getNumberFromString(String string) {
@@ -42,7 +43,7 @@ public class DocSearchCommand implements ICommand {
 
     private static void removeReactions(Message message, boolean leftArrow) {
         for (int i = 0; i < 10; i++) {
-            message.removeReaction("U+3" + i + "U+fe0fU+20e3").queue();
+            message.removeReaction(getNumberEmote(i)).queue();
         }
         if (leftArrow) {
             message.removeReaction(ARROW_LEFT).queue();
@@ -63,6 +64,7 @@ public class DocSearchCommand implements ICommand {
         JsonArray array = dataFetcher.getDocsResults(query);
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(Color.GREEN)
+                .setFooter(FOOTER)
                 .setTitle("Found Results", "https://docs.skunity.com/syntax/search/"
                         + URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
         addDocsResponse(builder, array, 0);
@@ -70,7 +72,7 @@ public class DocSearchCommand implements ICommand {
                 .queue(response -> {
                     response.addReaction(MessageUtils.DELETE_REACTION).queue();
                     for (int i = 0; i < Math.min(array.size(), 10); i++) {
-                        response.addReaction("U+3" + i + "U+fe0fU+20e3").queue();
+                        response.addReaction(getNumberEmote(i)).queue();
                     }
                     if (array.size() >= 10) {
                         response.addReaction(ARROW_RIGHT).queue();
@@ -96,6 +98,7 @@ public class DocSearchCommand implements ICommand {
                 .setTitle(object.getString(JsonKeys.NAME.getKey()),
                         "https://docs.skunity.com/syntax/search/"
                                 + URLEncoder.encode(object.getString(JsonKeys.NAME.getKey()), StandardCharsets.UTF_8.name()))
+                .setFooter(FOOTER)
                 .setColor(Color.YELLOW)
                 .addField("Pattern", "```" + object.getString(JsonKeys.PATTERN.getKey()) + "```", false);
         String description = object.getString(JsonKeys.DESC.getKey());
@@ -129,7 +132,7 @@ public class DocSearchCommand implements ICommand {
             found -= 10;
             removeReactions(message, true);
             JsonArray array = dataFetcher.getDocsResults(query);
-            EmbedBuilder builder = new EmbedBuilder().setColor(Color.YELLOW);
+            EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
             addDocsResponse(builder, array, found);
             message.editMessage(builder.build()).queue();
             int total = array.size() - found;
@@ -138,13 +141,13 @@ public class DocSearchCommand implements ICommand {
             }
             message.addReaction(ARROW_LEFT).queue();
             for (int i = 0; i < total; i++) {
-                message.addReaction("U+3" + i + "U+fe0fU+20e3").queue();
+                message.addReaction(getNumberEmote(i)).queue();
             }
         } else if (emote.getAsCodepoints().equals(ARROW_RIGHT)) {
             found += 10;
             removeReactions(message, (found >= 20));
             JsonArray array = dataFetcher.getDocsResults(query);
-            EmbedBuilder builder = new EmbedBuilder().setColor(Color.YELLOW);
+            EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
             addDocsResponse(builder, array, found);
             message.editMessage(builder.build()).queue();
             if (found >= 10) {
@@ -163,6 +166,10 @@ public class DocSearchCommand implements ICommand {
                 message.getChannel().sendMessage(getResponse(query, found + (foundChar - '0'))).queue();
             }
         }
+    }
+
+    private static String getNumberEmote(int number) {
+        return "U+3" + number + "U+fe0fU+20e3";
     }
 
     @Override

@@ -1,7 +1,6 @@
 package software.bigbade.skriptbot.utils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -11,10 +10,6 @@ public final class MessageUtils {
     public static final String DELETE_REACTION = "U+274C";
     private MessageUtils() {}
 
-    public static void sendMessageWithReaction(TextChannel channel, Message message) {
-        channel.sendMessage(message).queue(response -> response.addReaction(DELETE_REACTION).queue());
-    }
-
     public static void sendEmbedWithReaction(TextChannel channel, MessageEmbed message) {
         channel.sendMessage(message).queue(response -> response.addReaction(DELETE_REACTION).queue());
     }
@@ -22,6 +17,7 @@ public final class MessageUtils {
     public static MessageEmbed getErrorMessage(String title, String description) {
         return new EmbedBuilder().setTitle(title)
                 .setColor(Color.RED)
+                .setFooter("Error")
                 .setThumbnail("https://i.imgur.com/AjlWaz5.png")
                 .setDescription(description).build();
     }

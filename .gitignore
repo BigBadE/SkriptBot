@@ -1,0 +1,10 @@
+#Intellij
+.idea/
+*.iml
+
+#Gradle + subprojects
+.gradle/
+build/
+
+#Bash scripts
+*.s

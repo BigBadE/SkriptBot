@@ -62,6 +62,15 @@ public class DocSearchCommand implements ICommand {
 
         String query = String.join(" ", args);
         JsonArray array = dataFetcher.getDocsResults(query);
+        if(array.isEmpty()) {
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No results\n",
+                    "No results were found for that query"));
+            return;
+        }
+        if(array.size() == 1) {
+            channel.sendMessage(getResponse(array, 0)).queue();
+            return;
+        }
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(Color.GREEN)
                 .setFooter(FOOTER)
@@ -90,9 +99,13 @@ public class DocSearchCommand implements ICommand {
         }
     }
 
-    @SneakyThrows(UnsupportedEncodingException.class)
     public MessageEmbed getResponse(String query, int index) {
         JsonArray array = dataFetcher.getDocsResults(query);
+        return getResponse(array, index);
+    }
+
+    @SneakyThrows(UnsupportedEncodingException.class)
+    private static MessageEmbed getResponse(JsonArray array, int index) {
         JsonObject object = (JsonObject) array.get(index);
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(object.getString(JsonKeys.NAME.getKey()),
@@ -129,33 +142,9 @@ public class DocSearchCommand implements ICommand {
         String query = RegexPatterns.SPACE_PATTERN.split(command.getContentDisplay(), 2)[1];
         int found = getNumberFromString(Objects.requireNonNull(message.getEmbeds().get(0).getFields().get(0).getName()));
         if (emote.getAsCodepoints().equals(ARROW_LEFT)) {
-            found -= 10;
-            removeReactions(message, true);
-            JsonArray array = dataFetcher.getDocsResults(query);
-            EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
-            addDocsResponse(builder, array, found);
-            message.editMessage(builder.build()).queue();
-            int total = array.size() - found;
-            if (total >= 10) {
-                message.addReaction(ARROW_RIGHT).queue();
-            }
-            message.addReaction(ARROW_LEFT).queue();
-            for (int i = 0; i < total; i++) {
-                message.addReaction(getNumberEmote(i)).queue();
-            }
+            addReactions(message, query, found);
         } else if (emote.getAsCodepoints().equals(ARROW_RIGHT)) {
-            found += 10;
-            removeReactions(message, (found >= 20));
-            JsonArray array = dataFetcher.getDocsResults(query);
-            EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
-            addDocsResponse(builder, array, found);
-            message.editMessage(builder.build()).queue();
-            if (found >= 10) {
-                message.addReaction(ARROW_LEFT).queue();
-            }
-            if (array.size() >= 10) {
-                message.addReaction(ARROW_RIGHT).queue();
-            }
+            addReactions(message, query, found+10);
         } else {
             String codepoint = emote.getAsCodepoints();
             if (codepoint.length() != 16) {
@@ -165,6 +154,23 @@ public class DocSearchCommand implements ICommand {
             if (foundChar >= '0' && foundChar <= '9') {
                 message.getChannel().sendMessage(getResponse(query, found + (foundChar - '0'))).queue();
             }
+        }
+    }
+
+    private void addReactions(Message message, String query, int index) {
+        removeReactions(message, (index >= 20));
+        JsonArray array = dataFetcher.getDocsResults(query);
+        EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
+        addDocsResponse(builder, array, index);
+        message.editMessage(builder.build()).queue();
+        if (index > 9) {
+            message.addReaction(ARROW_LEFT).queue();
+        }
+        for (int i = 0; i < array.size()-index; i++) {
+            message.addReaction(getNumberEmote(i)).queue();
+        }
+        if (array.size() > index+9) {
+            message.addReaction(ARROW_RIGHT).queue();
         }
     }
 

@@ -21,9 +21,12 @@ repositories {
 }
 
 dependencies {
+    //Annotations
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
+    //json.simple
     implementation 'com.github.cliftonlabs:json-simple:3.1.0'
+    //JDA for Discord bots
     implementation('net.dv8tion:JDA:4.2.0_168') {
         exclude group: 'org.jetbrains', module: 'annotations'
         exclude group: 'org.slf4j', module: 'slf4j-api'
@@ -35,6 +38,14 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.8.0-beta4'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+
+    //Mocking
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.5.10'
+    testImplementation 'org.mockito:mockito-inline:3.5.10'
+    testImplementation 'org.mockito:mockito-core:3.5.10'
+
+    //Annotations
+    testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 test {

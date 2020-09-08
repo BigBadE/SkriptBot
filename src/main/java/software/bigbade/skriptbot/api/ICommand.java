@@ -9,5 +9,5 @@ public interface ICommand {
 
     default void onReaction(Message command, Message message, MessageReaction.ReactionEmote emote) {}
 
-    String[] getSymbol();
+    String[] getAliases();
 }

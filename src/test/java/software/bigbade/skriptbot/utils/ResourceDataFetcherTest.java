@@ -1,18 +1,25 @@
 package software.bigbade.skriptbot.utils;
 
+import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
+import com.github.cliftonlabs.json_simple.Jsonable;
 import com.github.cliftonlabs.json_simple.Jsoner;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.MockedStatic;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mockStatic;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ResourceDataFetcherTest {
     private static final MockedStatic<ResourceDataFetcher> mockedStatic = mockStatic(ResourceDataFetcher.class);
     private static ResourceDataFetcher dataFetcher;
@@ -26,6 +33,7 @@ class ResourceDataFetcherTest {
                 "    \"testing\": [" +
                 "      \"testValue\"" +
                 "    ]," +
+                "    \"invalid\": null" +
                 "  }" +
                 "}");
         mockedStatic.when(() -> ResourceDataFetcher
@@ -35,18 +43,42 @@ class ResourceDataFetcherTest {
         mockedStatic.reset();
     }
 
-
     private static void setStaticMockOutput(JsonObject output) {
         mockedStatic.when(() -> ResourceDataFetcher
                 .readData("https://docs.skunity.com/api/?key=key&function=doSearch&query=test+addon"))
                 .thenReturn(Optional.ofNullable(output));
     }
 
-    @AfterAll
-    static void closeStaticMocks() {
-        mockedStatic.close();
+    @AfterEach
+    void resetStaticMock() {
+        if(!mockedStatic.isClosed()) {
+            mockedStatic.reset();
+        }
     }
 
+    @Order(7)
+    @Test
+    void testGetInputStream() {
+        mockedStatic.close();
+        try {
+            Assertions.assertNotNull(ResourceDataFetcher.getInputStream("https://www.google.com"));
+        } catch (IOException e) {
+            Assertions.fail();
+        }
+    }
+
+    @Order(8)
+    @Test
+    void testGetJsonFromPage() {
+        Optional<Jsonable> optional = ResourceDataFetcher.readData("https://jsonplaceholder.typicode.com/todos/1");
+        Assertions.assertTrue(optional.isPresent());
+        Assertions.assertEquals("{\"id\":1,\"completed\":false,\"title\":\"delectus aut autem\",\"userId\":1}",
+                optional.get().toJson());
+        Assertions.assertFalse(ResourceDataFetcher.readData("https://www.google.com").isPresent());
+
+    }
+
+    @Order(1)
     @Test
     void testUnsuccessfulConnection() {
         JsonObject topData = new JsonObject();
@@ -56,6 +88,7 @@ class ResourceDataFetcherTest {
         Assertions.assertThrows(IllegalStateException.class, () -> new ResourceDataFetcher("key"));
     }
 
+    @Order(2)
     @Test
     void testAddonGetter() {
         Optional<String> found = dataFetcher.getAddon("testing");
@@ -66,6 +99,7 @@ class ResourceDataFetcherTest {
         Assertions.assertFalse(found.isPresent());
     }
 
+    @Order(3)
     @Test
     void testDocsGetterFails() {
         setStaticMockOutput(null);
@@ -73,6 +107,7 @@ class ResourceDataFetcherTest {
     }
 
     @SneakyThrows
+    @Order(6)
     @Test
     void testEmptyAddonResults() {
         JsonObject docsResult = (JsonObject) Jsoner.deserialize("{ \"response\": \"fail\" }");
@@ -80,6 +115,25 @@ class ResourceDataFetcherTest {
         Assertions.assertTrue(dataFetcher.getDocsResults("test addon").isEmpty());
     }
 
+    @Order(4)
+    @SneakyThrows
+    @Test
+    void testZeroResultsReturnsEmptyArray() {
+        //Test JSON output
+        JsonObject docsResult = (JsonObject) Jsoner.deserialize(
+                "{" +
+                        "  \"response\": \"success\"," +
+                        "  \"result\": {" +
+                        "    \"info\": {" +
+                        "      \"returned\": 0" +
+                        "    }" +
+                        "  }" +
+                        "}");
+        setStaticMockOutput(docsResult);
+        Assertions.assertTrue(dataFetcher.getDocsResults("test addon").isEmpty());
+    }
+
+    @Order(5)
     @SneakyThrows
     @Test
     void testGetsDocsResults() {

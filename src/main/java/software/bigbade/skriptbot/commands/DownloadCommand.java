@@ -1,5 +1,6 @@
 package software.bigbade.skriptbot.commands;
 
+import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import software.bigbade.skriptbot.api.ICommand;
@@ -8,7 +9,8 @@ import software.bigbade.skriptbot.utils.MessageUtils;
 import java.awt.Color;
 
 public class DownloadCommand implements ICommand {
-    private static final String[] ALIASES = new String[] { "down", "download", "downlaods" };
+    @Getter
+    private static final String[] aliases = new String[] { "down", "download", "downlaods" };
     @Override
     public void onCommand(TextChannel channel, String[] args) {
         MessageUtils.sendEmbedWithReaction(channel, new EmbedBuilder().setTitle("Downloading Skript")
@@ -24,10 +26,5 @@ public class DownloadCommand implements ICommand {
                 .addField("Extra Info", "Note that all versions of Skript not by Njol are unofficial and " +
                         "their issues should be reported to their respective issue trackers", false)
                 .setFooter("Downloads").build());
-    }
-
-    @Override
-    public String[] getSymbol() {
-        return ALIASES;
     }
 }

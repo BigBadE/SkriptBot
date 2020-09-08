@@ -24,7 +24,7 @@ public class ArgumentParser {
                     break;
                 case "--skunitykey":
                     checkArgumentLength(args, i);
-                    builder.skUnityToken(args[i++]);
+                    builder.skUnityKey(args[i++]);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown argument: " + args[i-1]);

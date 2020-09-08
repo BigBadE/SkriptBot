@@ -3,19 +3,15 @@ package software.bigbade.skriptbot.utils;
 import java.util.HashMap;
 
 /**
- * HTML Un-escaper by Nick Frolov.
- * <p>
- * With improvement suggested by Axel Dörfler.
- * <p>
- * Replaced character map with HTML5 characters from<a href="https://www.w3schools.com/charsets/ref_html_entities_a.asp">
- * https://www.w3schools.com/charsets/ref_html_entities_a.asp</a>
+ * Basic HTML unescaper, original from:
+ * https://gist.github.com/MarkJeronimus/798c452582e64410db769933ec71cfb7
  *
  * @author Nick Frolov, Mark Jeronimus
  */
 // Created 2020-06-22
 public final class HTMLUtilities {
     // Tables optimized for smallest .class size (without resorting to compression)
-    private static final String[] NAMES = {"gt", "lt", "quot" };
+    private static final String[] NAMES = {"gt", "lt", "quot"};
     private static final char[] CHARACTERS = {'<', '>', '"'};
 
     private static final HashMap<String, Character> LOOKUP_MAP;
@@ -33,7 +29,8 @@ public final class HTMLUtilities {
         LOOKUP_MAP = lookupMap;
     }
 
-    private HTMLUtilities() { }
+    private HTMLUtilities() {
+    }
 
     //TODO reduce cognitive complexity
     public static String unescapeHtml(String input) {
@@ -70,44 +67,15 @@ public final class HTMLUtilities {
                 continue;
             }
 
-            // Check the kind of entity
-            if (input.charAt(escStart) == '#') {
-                // Numeric entity
-                int numStart = escStart + 1;
-                int radix;
 
-                char firstChar = input.charAt(numStart);
-                if (firstChar == 'x' || firstChar == 'X') {
-                    numStart++;
-                    radix = 16;
-                } else {
-                    radix = 10;
-                }
-
-                try {
-                    int entityValue = Integer.parseInt(input.substring(numStart, escEnd), radix);
-
-                    result.append(input, start, escStart - 1);
-
-                    if (entityValue > 0xFFFF) {
-                        result.append(Character.toChars(entityValue));
-                    } else {
-                        result.append((char) entityValue);
-                    }
-                } catch (NumberFormatException ignored) {
-                    escStart++;
-                    continue;
-                }
-            } else {
-                // Named entity
-                Character codePoint = LOOKUP_MAP.get(input.substring(escStart, escEnd));
-                if (codePoint == null) {
-                    escStart++;
-                    continue;
-                }
-
-                result.append(input, start, escStart - 1).append(codePoint);
+            // Named entity
+            Character codePoint = LOOKUP_MAP.get(input.substring(escStart, escEnd));
+            if (codePoint == null) {
+                escStart++;
+                continue;
             }
+
+            result.append(input, start, escStart - 1).append(codePoint);
 
             // Skip escape
             start = escEnd + 1;

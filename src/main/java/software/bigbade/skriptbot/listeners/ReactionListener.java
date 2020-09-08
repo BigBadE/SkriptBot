@@ -51,7 +51,7 @@ public class ReactionListener extends ListenerAdapter {
 
                 String foundCommand = CommandListener.getCommandName(prefix, foundMessage);
                 for (ICommand command : commands) {
-                    if (StringUtils.matchesArray(foundCommand, command.getSymbol())) {
+                    if (StringUtils.matchesArray(foundCommand, command.getAliases())) {
                         command.onReaction(lastMessage, message, reaction);
                     }
                 }

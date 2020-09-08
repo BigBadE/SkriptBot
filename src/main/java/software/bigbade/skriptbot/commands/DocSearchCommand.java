@@ -179,7 +179,7 @@ public class DocSearchCommand implements ICommand {
     }
 
     @Override
-    public String[] getSymbol() {
+    public String[] getAliases() {
         return aliases;
     }
 }

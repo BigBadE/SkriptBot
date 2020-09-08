@@ -2,6 +2,7 @@ package software.bigbade.skriptbot.commands;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonObject;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -14,12 +15,12 @@ import java.awt.Color;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 public class AddonSearchCommand implements ICommand {
+    @Getter
     private static final String[] aliases = new String[]{"a", "addon", "addons"};
     private final ResourceDataFetcher dataFetcher;
     private final String prefix;
@@ -89,20 +90,15 @@ public class AddonSearchCommand implements ICommand {
      * @param bytes Amount of bytes
      * @return Human readable format
      */
-    private static String humanReadableByteCountSI(long bytes) {
+    public static String humanReadableByteCountSI(long bytes) {
         if (-1000 < bytes && bytes < 1000) {
             return bytes + " B";
         }
         CharacterIterator ci = new StringCharacterIterator("kMGTPE");
-        while (bytes <= -999_950 || bytes >= 999_950) {
+        while (bytes <= -999950 || bytes >= 999950) {
             bytes /= 1000;
             ci.next();
         }
         return String.format("%.1f %cB", bytes / 1000.0, ci.current());
-    }
-
-    @Override
-    public String[] getSymbol() {
-        return aliases;
     }
 }

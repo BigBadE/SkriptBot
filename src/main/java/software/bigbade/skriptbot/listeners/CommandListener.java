@@ -27,7 +27,7 @@ public class CommandListener extends ListenerAdapter {
 
         String foundCommand = getCommandName(prefix, message);
         for (ICommand command : commands) {
-            if (StringUtils.matchesArray(foundCommand, command.getSymbol())) {
+            if (StringUtils.matchesArray(foundCommand, command.getAliases())) {
                 int size = 0;
                 for(char character : message.toCharArray()) {
                     if(character == ' ') {

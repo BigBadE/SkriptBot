@@ -27,33 +27,49 @@ public class ResourceDataFetcher {
     public ResourceDataFetcher(String skUnityKey) {
         this.skUnityKey = skUnityKey;
         JsonObject result = (JsonObject) readData("https://api.skripttools.net/v4/addons").orElseThrow(() -> new IllegalStateException("SkriptTools addon page is down!"));
-        if(!result.getBoolean(JsonKeys.SUCCESS.getKey())) {
+        if (!result.getBoolean(JsonKeys.SUCCESS.getKey())) {
             throw new IllegalStateException("SkriptTools addon get not successful");
         }
         JsonObject data = result.getMap(JsonKeys.DATA.getKey());
-        for(Map.Entry<String, Object> entry : data.entrySet()) {
-            if(entry.getValue() == null) {
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            if (entry.getValue() == null) {
                 continue;
             }
             JsonArray array = (JsonArray) entry.getValue();
-            addons.put(entry.getKey().toLowerCase(), (String) array.get(array.size()-1));
+            addons.put(entry.getKey().toLowerCase(), (String) array.get(array.size() - 1));
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Jsonable> Optional<T> readData(String url) {
+        try (InputStreamReader reader = new InputStreamReader(getInputStream(url), StandardCharsets.UTF_8)) {
+            return Optional.of((T) Jsoner.deserialize(reader));
+        } catch (IOException | JsonException e) {
+            SkriptBot.getLogger().error("Could not read data from {}", url, e);
+            return Optional.empty();
+        }
+    }
+
+    public static InputStream getInputStream(String url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.addRequestProperty("User-Agent", "Mozilla/4.0");
+        return connection.getInputStream();
     }
 
     @SneakyThrows(UnsupportedEncodingException.class)
     public JsonArray getDocsResults(String query) {
         Optional<Jsonable> optional = readData("https://docs.skunity.com/api/?key="
                 + skUnityKey + "&function=doSearch&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
-        if(!optional.isPresent()) {
+        if (!optional.isPresent()) {
             return new JsonArray();
         }
         JsonObject result = (JsonObject) optional.get();
-        if(!result.getString(JsonKeys.RESPONSE.getKey()).equals("success")) {
+        if (!result.getString(JsonKeys.RESPONSE.getKey()).equals("success")) {
             return new JsonArray();
         }
         result = (JsonObject) result.get("result");
         int found = ((JsonObject) result.get("info")).getInteger(JsonKeys.RETURNED.getKey());
-        if(found == 0) {
+        if (found == 0) {
             return new JsonArray();
         }
         return (JsonArray) result.get("records");
@@ -66,21 +82,5 @@ public class ResourceDataFetcher {
             }
         }
         return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T extends Jsonable> Optional<T> readData(String url) {
-        try(InputStreamReader reader = new InputStreamReader(getInputStream(url), StandardCharsets.UTF_8)) {
-            return Optional.of((T) Jsoner.deserialize(reader));
-        } catch (IOException | JsonException e) {
-            SkriptBot.getLogger().error("Could not read data from {}", url, e);
-            return Optional.empty();
-        }
-    }
-
-    private static InputStream getInputStream(String url) throws IOException {
-        HttpURLConnection httpcon = (HttpURLConnection) new URL(url).openConnection();
-        httpcon.addRequestProperty("User-Agent", "Mozilla/4.0");
-        return httpcon.getInputStream();
     }
 }

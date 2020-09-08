@@ -39,7 +39,7 @@ public class Main {
     }
 
     private static void registerCommands() {
-        ResourceDataFetcher dataFetcher = new ResourceDataFetcher(arguments.getSkUnityToken());
+        ResourceDataFetcher dataFetcher = new ResourceDataFetcher(arguments.getSkUnityKey());
         commandManager.registerCommand(new AddonSearchCommand(dataFetcher, arguments.getPrefix()));
         commandManager.registerCommand(new DocSearchCommand(dataFetcher));
         commandManager.registerCommand(new DownloadCommand());

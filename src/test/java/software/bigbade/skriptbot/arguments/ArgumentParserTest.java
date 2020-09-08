@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class ArgumentParserTest {
-    private static final String[] BASIC_ARGUMENT = new String[] { "--token", "token", "--debug", "--prefix", "test"};
+    private static final String[] BASIC_ARGUMENT = new String[] { "--token", "token", "--debug", "--skunitykey", "key", "--prefix", "test"};
     private static final String[] DEFAULT_VALUE_ARGUMENT = new String[] { "--token", "token" };
     private static final String UNKNOWN_VALUE_ARGUMENT = "test";
     private static final String NO_VALUE_ARGUMENT = "--token";
@@ -17,6 +17,7 @@ class ArgumentParserTest {
         //Make sure all arguments were parsed right
         Assertions.assertEquals("token", arguments.getToken());
         Assertions.assertEquals("test", arguments.getPrefix());
+        Assertions.assertEquals("key", arguments.getSkUnityKey());
         Assertions.assertTrue(arguments.isDebugMode());
         arguments = new ArgumentParser(DEFAULT_VALUE_ARGUMENT).getArguments();
         //Test default cases

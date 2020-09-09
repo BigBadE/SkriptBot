@@ -2,6 +2,7 @@ package software.bigbade.skriptbot.commands;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonObject;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,32 +25,14 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class DocSearchCommand implements ICommand {
-    private static final String[] aliases = new String[]{"d", "doc", "docs", "documentation"};
-    private static final String ARROW_LEFT = "U+20C0";
-    private static final String ARROW_RIGHT = "U+25B6";
-    private static final String FOOTER = "Powered by skUnity Docs 2";
+    @Getter
+    private final String[] aliases = new String[]{"d", "doc", "docs", "documentation"};
+
+    public static final String FOOTER = "Powered by skUnity Docs 2";
+    public static final String ARROW_LEFT = "U+20C0";
+    public static final String ARROW_RIGHT = "U+25B6";
+
     private final ResourceDataFetcher dataFetcher;
-
-    private static int getNumberFromString(String string) {
-        char character;
-        int index = 0;
-        int found = 0;
-        while ((character = string.charAt(index++)) != '0') {
-            found *= 10;
-            found += character - '0';
-        }
-        return found;
-    }
-
-    private static void removeReactions(Message message, boolean leftArrow) {
-        for (int i = 0; i < 10; i++) {
-            message.removeReaction(getNumberEmote(i)).queue();
-        }
-        if (leftArrow) {
-            message.removeReaction(ARROW_LEFT).queue();
-        }
-        message.removeReaction(ARROW_RIGHT).queue();
-    }
 
     @SneakyThrows(UnsupportedEncodingException.class)
     @Override
@@ -62,12 +45,12 @@ public class DocSearchCommand implements ICommand {
 
         String query = String.join(" ", args);
         JsonArray array = dataFetcher.getDocsResults(query);
-        if(array.isEmpty()) {
-            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No results\n",
+        if (array.isEmpty()) {
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No results",
                     "No results were found for that query"));
             return;
         }
-        if(array.size() == 1) {
+        if (array.size() == 1) {
             channel.sendMessage(getResponse(array, 0)).queue();
             return;
         }
@@ -89,23 +72,38 @@ public class DocSearchCommand implements ICommand {
                 });
     }
 
-    public void addDocsResponse(EmbedBuilder builder, JsonArray array, int start) {
-        for (int i = start; i < Math.min(array.size(), start + 10); i++) {
-            JsonObject result = (JsonObject) array.get(i);
-            String doc = result.getString(JsonKeys.DOC.getKey());
-            builder.addField(i + ". " + result.getString(JsonKeys.NAME.getKey()) + " ("
-                            + doc.substring(0, doc.length() - 1) + ")",
-                    result.getString(JsonKeys.PATTERN.getKey()), false);
+    /**
+     * Converts string starting with a number that ends with a .
+     * to an integer.
+     *
+     * @param string String that starts with a number
+     * @return Number from string
+     */
+    public static int getNumberFromString(String string) {
+        char character;
+        int index = 0;
+        int found = 0;
+        while ((character = string.charAt(index++)) != '.') {
+            found *= 10;
+            found += character - '0';
+        }
+        return found;
+    }
+
+    public static void removeReactions(Message message, boolean leftArrow, boolean rightArrow) {
+        for (int i = 0; i < 10; i++) {
+            message.removeReaction(getNumberEmote(i)).queue();
+        }
+        if (leftArrow) {
+            message.removeReaction(ARROW_LEFT).queue();
+        }
+        if (rightArrow) {
+            message.removeReaction(ARROW_RIGHT).queue();
         }
     }
 
-    public MessageEmbed getResponse(String query, int index) {
-        JsonArray array = dataFetcher.getDocsResults(query);
-        return getResponse(array, index);
-    }
-
     @SneakyThrows(UnsupportedEncodingException.class)
-    private static MessageEmbed getResponse(JsonArray array, int index) {
+    public static MessageEmbed getResponse(JsonArray array, int index) {
         JsonObject object = (JsonObject) array.get(index);
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(object.getString(JsonKeys.NAME.getKey()),
@@ -122,16 +120,35 @@ public class DocSearchCommand implements ICommand {
         if (!examples.isEmpty()) {
             builder.addField("Example", "```" + HTMLUtilities.unescapeHtml(((JsonObject) examples.get(0)).getString(JsonKeys.EXAMPLE.getKey())) + "```", false);
         }
-        String requires = object.getString(JsonKeys.PLUGIN.getKey());
-        if (requires.isEmpty()) {
-            requires = "Skript";
-        }
         String addon = object.getString(JsonKeys.ADDON.getKey());
         if (!addon.isEmpty()) {
             builder.addField("Addon", addon, true);
         }
+        String requires = object.getString(JsonKeys.PLUGIN.getKey());
+        if (requires.isEmpty()) {
+            requires = "Skript";
+        }
         builder.addField("Requires", requires, true);
         return builder.build();
+    }
+
+    public static String getNumberEmote(int number) {
+        return "U+3" + number + "U+fe0fU+20e3";
+    }
+
+    public void addDocsResponse(EmbedBuilder builder, JsonArray array, int start) {
+        for (int i = start; i < Math.min(array.size(), start + 10); i++) {
+            JsonObject result = (JsonObject) array.get(i);
+            String doc = result.getString(JsonKeys.DOC.getKey());
+            builder.addField(i + ". " + result.getString(JsonKeys.NAME.getKey()) + " ("
+                            + doc.substring(0, doc.length() - 1) + ")",
+                    "```" + result.getString(JsonKeys.PATTERN.getKey()) + "```", false);
+        }
+    }
+
+    public MessageEmbed getResponse(String query, int index) {
+        JsonArray array = dataFetcher.getDocsResults(query);
+        return getResponse(array, index);
     }
 
     @Override
@@ -142,9 +159,9 @@ public class DocSearchCommand implements ICommand {
         String query = RegexPatterns.SPACE_PATTERN.split(command.getContentDisplay(), 2)[1];
         int found = getNumberFromString(Objects.requireNonNull(message.getEmbeds().get(0).getFields().get(0).getName()));
         if (emote.getAsCodepoints().equals(ARROW_LEFT)) {
-            addReactions(message, query, found);
+            scrollCommand(message, query, found);
         } else if (emote.getAsCodepoints().equals(ARROW_RIGHT)) {
-            addReactions(message, query, found+10);
+            scrollCommand(message, query, found + 10);
         } else {
             String codepoint = emote.getAsCodepoints();
             if (codepoint.length() != 16) {
@@ -157,29 +174,20 @@ public class DocSearchCommand implements ICommand {
         }
     }
 
-    private void addReactions(Message message, String query, int index) {
-        removeReactions(message, (index >= 20));
+    private void scrollCommand(Message message, String query, int index) {
         JsonArray array = dataFetcher.getDocsResults(query);
+        removeReactions(message, (index >= 20), (index + 10 <= array.size()));
         EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
         addDocsResponse(builder, array, index);
         message.editMessage(builder.build()).queue();
         if (index > 9) {
             message.addReaction(ARROW_LEFT).queue();
         }
-        for (int i = 0; i < array.size()-index; i++) {
+        for (int i = 0; i < array.size() - index; i++) {
             message.addReaction(getNumberEmote(i)).queue();
         }
-        if (array.size() > index+9) {
+        if (array.size() > index + 9) {
             message.addReaction(ARROW_RIGHT).queue();
         }
-    }
-
-    private static String getNumberEmote(int number) {
-        return "U+3" + number + "U+fe0fU+20e3";
-    }
-
-    @Override
-    public String[] getAliases() {
-        return aliases;
     }
 }

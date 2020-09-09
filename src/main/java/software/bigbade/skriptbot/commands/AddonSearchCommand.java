@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AddonSearchCommand implements ICommand {
     @Getter
-    private static final String[] aliases = new String[]{"a", "addon", "addons"};
+    private final String[] aliases = new String[]{"a", "addon", "addons"};
     private final ResourceDataFetcher dataFetcher;
     private final String prefix;
 

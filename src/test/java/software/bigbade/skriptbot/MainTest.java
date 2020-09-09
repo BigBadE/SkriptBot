@@ -6,6 +6,6 @@ import org.junit.jupiter.api.Test;
 class MainTest {
     @Test
     void testInvalidToken() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Main.main(new String[] { "--token", "notatoken" }));
+        Assertions.assertThrows(Exception.class, () -> Main.main(new String[]{"--token", "notatoken"}));
     }
 }

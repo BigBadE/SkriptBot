@@ -101,15 +101,6 @@ class DocSearchCommandTest {
     }
 
     @Test
-    void testRemoveReaction() {
-        when(MOCK_MESSAGE.removeReaction(ArgumentMatchers.anyString())).thenReturn(mockReactionDelete);
-        DocSearchCommand.removeReactions(MOCK_MESSAGE, true, true);
-        verify(mockReactionDelete, VerificationModeFactory.times(12)).queue();
-        DocSearchCommand.removeReactions(MOCK_MESSAGE, false, false);
-        verify(mockReactionDelete, VerificationModeFactory.times(22)).queue();
-    }
-
-    @Test
     void testCommandErrorMessages() {
         MOCKED_MESSAGE_UTILS.when(() -> MessageUtils
                 .getErrorMessage(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))

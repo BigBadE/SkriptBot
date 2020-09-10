@@ -25,52 +25,12 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class DocSearchCommand implements ICommand {
+    public static final String FOOTER = "Powered by skUnity Docs 2";
+    public static final String ARROW_LEFT = "U+25c0";
+    public static final String ARROW_RIGHT = "U+25b6";
     @Getter
     private final String[] aliases = new String[]{"d", "doc", "docs", "documentation"};
-
-    public static final String FOOTER = "Powered by skUnity Docs 2";
-    public static final String ARROW_LEFT = "U+20C0";
-    public static final String ARROW_RIGHT = "U+25B6";
-
     private final ResourceDataFetcher dataFetcher;
-
-    @SneakyThrows(UnsupportedEncodingException.class)
-    @Override
-    public void onCommand(TextChannel channel, String[] args) {
-        if (args.length == 0) {
-            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No Syntax Specified",
-                    "Usage: **.doc subtext**"));
-            return;
-        }
-
-        String query = String.join(" ", args);
-        JsonArray array = dataFetcher.getDocsResults(query);
-        if (array.isEmpty()) {
-            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No results",
-                    "No results were found for that query"));
-            return;
-        }
-        if (array.size() == 1) {
-            channel.sendMessage(getResponse(array, 0)).queue();
-            return;
-        }
-        EmbedBuilder builder = new EmbedBuilder()
-                .setColor(Color.GREEN)
-                .setFooter(FOOTER)
-                .setTitle("Found Results", "https://docs.skunity.com/syntax/search/"
-                        + URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
-        addDocsResponse(builder, array, 0);
-        channel.sendMessage(builder.build())
-                .queue(response -> {
-                    response.addReaction(MessageUtils.DELETE_REACTION).queue();
-                    for (int i = 0; i < Math.min(array.size(), 10); i++) {
-                        response.addReaction(getNumberEmote(i)).queue();
-                    }
-                    if (array.size() >= 10) {
-                        response.addReaction(ARROW_RIGHT).queue();
-                    }
-                });
-    }
 
     /**
      * Converts string starting with a number that ends with a .
@@ -88,18 +48,6 @@ public class DocSearchCommand implements ICommand {
             found += character - '0';
         }
         return found;
-    }
-
-    public static void removeReactions(Message message, boolean leftArrow, boolean rightArrow) {
-        for (int i = 0; i < 10; i++) {
-            message.removeReaction(getNumberEmote(i)).queue();
-        }
-        if (leftArrow) {
-            message.removeReaction(ARROW_LEFT).queue();
-        }
-        if (rightArrow) {
-            message.removeReaction(ARROW_RIGHT).queue();
-        }
     }
 
     @SneakyThrows(UnsupportedEncodingException.class)
@@ -136,6 +84,43 @@ public class DocSearchCommand implements ICommand {
         return "U+3" + number + "U+fe0fU+20e3";
     }
 
+    @SneakyThrows(UnsupportedEncodingException.class)
+    @Override
+    public void onCommand(TextChannel channel, String[] args) {
+        if (args.length == 0) {
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No Syntax Specified",
+                    "Usage: **.doc subtext**"));
+            return;
+        }
+
+        String query = String.join(" ", args);
+        JsonArray array = dataFetcher.getDocsResults(query);
+        if (array.isEmpty()) {
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No results",
+                    "No results were found for that query"));
+            return;
+        }
+        if (array.size() == 1) {
+            channel.sendMessage(getResponse(array, 0)).queue();
+            return;
+        }
+        EmbedBuilder builder = new EmbedBuilder()
+                .setColor(Color.GREEN)
+                .setFooter(FOOTER)
+                .setTitle("Found Results", "https://docs.skunity.com/syntax/search/"
+                        + URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
+        addDocsResponse(builder, array, 0);
+        channel.sendMessage(builder.build())
+                .queue(response -> {
+                    for (int i = 0; i < Math.min(array.size(), 10); i++) {
+                        response.addReaction(getNumberEmote(i)).queue();
+                    }
+                    response.addReaction(MessageUtils.DELETE_REACTION).queue();
+                    response.addReaction(ARROW_LEFT).queue();
+                    response.addReaction(ARROW_RIGHT).queue();
+                });
+    }
+
     public void addDocsResponse(EmbedBuilder builder, JsonArray array, int start) {
         for (int i = start; i < Math.min(array.size(), start + 10); i++) {
             JsonObject result = (JsonObject) array.get(i);
@@ -146,11 +131,6 @@ public class DocSearchCommand implements ICommand {
         }
     }
 
-    public MessageEmbed getResponse(String query, int index) {
-        JsonArray array = dataFetcher.getDocsResults(query);
-        return getResponse(array, index);
-    }
-
     @Override
     public void onReaction(Message command, Message message, MessageReaction.ReactionEmote emote) {
         if (!emote.isEmoji()) {
@@ -158,36 +138,33 @@ public class DocSearchCommand implements ICommand {
         }
         String query = RegexPatterns.SPACE_PATTERN.split(command.getContentDisplay(), 2)[1];
         int found = getNumberFromString(Objects.requireNonNull(message.getEmbeds().get(0).getFields().get(0).getName()));
+        JsonArray array = dataFetcher.getDocsResults(query);
         if (emote.getAsCodepoints().equals(ARROW_LEFT)) {
-            scrollCommand(message, query, found);
+            if (found < 10) {
+                return;
+            }
+            scrollCommand(message, array, found - 10);
         } else if (emote.getAsCodepoints().equals(ARROW_RIGHT)) {
-            scrollCommand(message, query, found + 10);
+            if (found >= array.size() - 10) {
+                return;
+            }
+            scrollCommand(message, array, found + 10);
         } else {
             String codepoint = emote.getAsCodepoints();
             if (codepoint.length() != 16) {
                 return;
             }
-            char foundChar = codepoint.charAt(3);
-            if (foundChar >= '0' && foundChar <= '9') {
-                message.getChannel().sendMessage(getResponse(query, found + (foundChar - '0'))).queue();
+            int foundNumb = codepoint.charAt(3) - '0';
+            if (foundNumb >= 0 && foundNumb <= Math.min(array.size() - found, 9)) {
+                message.getChannel().sendMessage(getResponse(array, found + foundNumb)).queue();
+                message.delete().queue();
             }
         }
     }
 
-    private void scrollCommand(Message message, String query, int index) {
-        JsonArray array = dataFetcher.getDocsResults(query);
-        removeReactions(message, (index >= 20), (index + 10 <= array.size()));
-        EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.YELLOW);
+    private void scrollCommand(Message message, JsonArray array, int index) {
+        EmbedBuilder builder = new EmbedBuilder().setFooter(FOOTER).setColor(Color.GREEN);
         addDocsResponse(builder, array, index);
         message.editMessage(builder.build()).queue();
-        if (index > 9) {
-            message.addReaction(ARROW_LEFT).queue();
-        }
-        for (int i = 0; i < array.size() - index; i++) {
-            message.addReaction(getNumberEmote(i)).queue();
-        }
-        if (array.size() > index + 9) {
-            message.addReaction(ARROW_RIGHT).queue();
-        }
     }
 }

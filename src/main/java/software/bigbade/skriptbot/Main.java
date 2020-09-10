@@ -6,6 +6,7 @@ import software.bigbade.skriptbot.commands.AddonSearchCommand;
 import software.bigbade.skriptbot.commands.CommandManager;
 import software.bigbade.skriptbot.commands.DocSearchCommand;
 import software.bigbade.skriptbot.commands.DownloadCommand;
+import software.bigbade.skriptbot.commands.FormattingCommand;
 import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
 import javax.security.auth.login.LoginException;
@@ -42,6 +43,7 @@ public class Main {
         ResourceDataFetcher dataFetcher = new ResourceDataFetcher(arguments.getSkUnityKey());
         commandManager.registerCommand(new AddonSearchCommand(dataFetcher, arguments.getPrefix()));
         commandManager.registerCommand(new DocSearchCommand(dataFetcher));
+        commandManager.registerCommand(new FormattingCommand());
         commandManager.registerCommand(new DownloadCommand());
     }
 }

@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.util.Collections;
 
 public final class MessageUtils {
-    public static final String DELETE_REACTION = "U+274C";
+    public static final String DELETE_REACTION = "U+274c";
     private MessageUtils() {}
 
     public static void sendEmbedWithReaction(TextChannel channel, MessageEmbed message) {

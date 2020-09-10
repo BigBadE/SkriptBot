@@ -28,7 +28,7 @@ public class ReactionListener extends ListenerAdapter {
             return;
         }
         MessageReaction.ReactionEmote reaction = event.getReaction().getReactionEmote();
-        if (reaction.isEmoji() || event.getUser() == null || event.getUser().isBot()) {
+        if (!reaction.isEmoji() || event.getUser() == null || event.getUser().isBot()) {
             return;
         }
         event.retrieveMessage().queue(message -> handleReactionMessage(message, event.getUser(), reaction));
@@ -47,12 +47,12 @@ public class ReactionListener extends ListenerAdapter {
                 message.delete().queue();
                 return;
             }
+
             Message lastMessage = history.getRetrievedHistory().get(0);
             String foundMessage = lastMessage.getContentStripped();
             if (!foundMessage.startsWith(prefix)) {
                 return;
             }
-
 
             String foundCommand = CommandListener.getCommandName(prefix, foundMessage);
             for (ICommand command : commands) {

@@ -15,9 +15,6 @@ import org.mockito.MockedStatic;
 import software.bigbade.skriptbot.URLConnectionHandler;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mockStatic;
@@ -75,12 +72,12 @@ class ResourceDataFetcherTest {
     @Order(8)
     @Test
     void testGetJsonFromPage() {
-        URLConnectionHandler.resetValues(TEST_JSON, null, connection -> {});
+        URLConnectionHandler.resetValues(TEST_JSON, null, null);
         Optional<Jsonable> optional = ResourceDataFetcher.readData("testing:test.file");
         Assertions.assertTrue(optional.isPresent());
         Assertions.assertEquals(TEST_JSON,
                 optional.get().toJson());
-        URLConnectionHandler.resetValues("not json", null, connection -> {});
+        URLConnectionHandler.resetValues("not json", null, null);
         Assertions.assertFalse(ResourceDataFetcher.readData("https://www.google.com").isPresent());
 
     }

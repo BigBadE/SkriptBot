@@ -11,7 +11,7 @@ import java.awt.Color;
 import java.util.Arrays;
 
 public class FormattingCommand implements ICommand {
-    private static final MessageEmbed FORMATTING_EMBED = new MessageEmbed(null, "Formatting Code In Discord",
+    public static final MessageEmbed FORMATTING_EMBED = new MessageEmbed(null, "Formatting Code In Discord",
             null, EmbedType.RICH, null, Color.GREEN.getRGB(),
             null, null, null, null,
             new MessageEmbed.Footer("Format", null, null), null,

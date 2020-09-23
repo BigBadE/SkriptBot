@@ -10,7 +10,7 @@ public class ProgramArguments {
     private final String pastebinKey;
     private final String skUnityKey;
     private final String token;
-    @SuppressWarnings("FieldMayBeFinal")
+    @SuppressWarnings({"FieldMayBeFinal", "UnusedAssignment"})
     @Builder.Default
     private String prefix = ".";
 }

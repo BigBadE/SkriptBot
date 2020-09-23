@@ -28,7 +28,9 @@ public class PastebinCommand implements ICommand {
                     channel, MessageUtils.getErrorMessage("Invalid Arguments",
                             "Usage: **" + prefix + "pastebin (message id)**\nTo get a Message ID, enable" +
                                     "developer mode in Discord settings, right click the message, and click \"Copy ID\""));
+            return;
         }
+
         channel.retrieveMessageById(args[0]).onErrorMap(error -> null).queue(message -> {
             if(message == null) {
                 MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No Message Found",
@@ -52,8 +54,7 @@ public class PastebinCommand implements ICommand {
         arguments.put("api_option", "paste");
         arguments.put("api_paste_private", "1");
         Message.Attachment attachment = message.getAttachments().get(0);
-        arguments.put("api_paste_name", message.getAuthor().getName() + "'s File: " + attachment.getFileName()
-                + "." + attachment.getFileExtension());
+        arguments.put("api_paste_name", message.getAuthor().getName() + "'s File: " + attachment.getFileName());
         arguments.put("api_paste_expire_date", "1D");
         arguments.put("api_dev_key", pastebinApiKey);
         arguments.put("api_paste_format", attachment.getFileExtension());

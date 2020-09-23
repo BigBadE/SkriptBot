@@ -3,7 +3,6 @@ package software.bigbade.skriptbot.utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Map;
 
 class JsonKeysTest {

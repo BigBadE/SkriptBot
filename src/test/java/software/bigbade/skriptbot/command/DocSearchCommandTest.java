@@ -69,6 +69,9 @@ class DocSearchCommandTest {
     @SneakyThrows
     @BeforeAll
     static void setupTestArray() {
+        MOCKED_MESSAGE_UTILS.when(() -> MessageUtils
+                .getErrorMessage(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
+                .thenCallRealMethod();
         TEST_ARRAY = (JsonArray) Jsoner.deserialize("[{\"name\": \"Test Docs\",\"doc\": \"types\"," +
                 "\"desc\": \"Test type\",\"addon\": \"Skript\",\"version\": \"1.0\",\"pattern\": \"test[s]\"," +
                 "\"plugin\": \"\",\"examples\": [{\"example\": \"unit tests &lt; no unit tests\"}]},{\"name\": " +
@@ -106,15 +109,12 @@ class DocSearchCommandTest {
 
     @Test
     void testCommandErrorMessages() {
-        MOCKED_MESSAGE_UTILS.when(() -> MessageUtils
-                .getErrorMessage(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
-                .thenCallRealMethod();
         DOC_SEARCH_COMMAND.onCommand(MOCK_TEXT_CHANNEL, new String[0]);
         MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
                 MessageUtils.getErrorMessage("No Syntax Specified",
                         "Usage: **.doc subtext**")));
         when(MOCK_DATA_FETCHER.getDocsResults("test docs")).thenReturn(new JsonArray());
-        MOCKED_MESSAGE_UTILS.reset();
+        
         DOC_SEARCH_COMMAND.onCommand(MOCK_TEXT_CHANNEL, new String[] { "test", "docs" });
         MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
                 MessageUtils.getErrorMessage("No Results",

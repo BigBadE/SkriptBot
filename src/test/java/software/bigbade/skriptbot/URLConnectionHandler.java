@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -52,7 +53,11 @@ public class URLConnectionHandler extends URLStreamHandler {
 
                 @Override
                 public void write(@Nonnull byte[] b) {
-                    Assertions.assertArrayEquals(outputStream.getBytes(StandardCharsets.UTF_8), b);
+                    if(outputStream == null) {
+                        Assertions.fail();
+                    } else {
+                        Assertions.assertArrayEquals(outputStream.getBytes(StandardCharsets.UTF_8), b);
+                    }
                 }
             };
         }
@@ -61,7 +66,9 @@ public class URLConnectionHandler extends URLStreamHandler {
         @Override
         public void connect() {
             contentLength = this.fixedContentLength;
-            checker.accept(handler);
+            if(checker != null) {
+                checker.accept(handler);
+            }
         }
     };
 
@@ -70,7 +77,7 @@ public class URLConnectionHandler extends URLStreamHandler {
         return connection;
     }
 
-    public static void resetValues(String input, String output, Consumer<URLConnectionHandler> checker) {
+    public static void resetValues(@Nonnull String input, @Nullable String output, @Nullable Consumer<URLConnectionHandler> checker) {
         if(!registered) {
             URL.setURLStreamHandlerFactory(protocol -> URLConnectionHandler.handler);
             registered = true;

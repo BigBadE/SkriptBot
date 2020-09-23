@@ -56,6 +56,7 @@ task codeCoverageReport(type: JacocoReport) {
     executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
 
     subprojects.each {
+        //noinspection GroovyAssignabilityCheck
         sourceSets it.sourceSets.main
     }
 
@@ -68,6 +69,7 @@ task codeCoverageReport(type: JacocoReport) {
 }
 
 codeCoverageReport.dependsOn {
+    //noinspection GrUnresolvedAccess
     project*.test
 }
 

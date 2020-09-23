@@ -72,6 +72,7 @@ public class PastebinCommand implements ICommand {
                     "Error: " + returned));
             return;
         }
+
         MessageUtils.sendEmbedWithReaction(channel, new EmbedBuilder().setTitle("Pastebin'd file")
                 .setDescription(returned).build());
     }

@@ -19,6 +19,7 @@ import software.bigbade.skriptbot.utils.RegexPatterns;
 import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
 import java.awt.Color;
+import java.awt.SystemTray;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

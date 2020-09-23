@@ -12,8 +12,12 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.MockedStatic;
+import software.bigbade.skriptbot.URLConnectionHandler;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mockStatic;
@@ -22,6 +26,8 @@ import static org.mockito.Mockito.mockStatic;
 class ResourceDataFetcherTest {
     private static final MockedStatic<ResourceDataFetcher> MOCK_DATA_FETCHER = mockStatic(ResourceDataFetcher.class);
     private static ResourceDataFetcher dataFetcher;
+
+    private static final String TEST_JSON = "{\"id\":1,\"completed\":false,\"title\":\"delectus aut autem\",\"userId\":1}";
 
     @SneakyThrows
     @BeforeAll
@@ -69,10 +75,12 @@ class ResourceDataFetcherTest {
     @Order(8)
     @Test
     void testGetJsonFromPage() {
-        Optional<Jsonable> optional = ResourceDataFetcher.readData("https://jsonplaceholder.typicode.com/todos/1");
+        URLConnectionHandler.resetValues(TEST_JSON, null, connection -> {});
+        Optional<Jsonable> optional = ResourceDataFetcher.readData("testing:test.file");
         Assertions.assertTrue(optional.isPresent());
-        Assertions.assertEquals("{\"id\":1,\"completed\":false,\"title\":\"delectus aut autem\",\"userId\":1}",
+        Assertions.assertEquals(TEST_JSON,
                 optional.get().toJson());
+        URLConnectionHandler.resetValues("not json", null, connection -> {});
         Assertions.assertFalse(ResourceDataFetcher.readData("https://www.google.com").isPresent());
 
     }

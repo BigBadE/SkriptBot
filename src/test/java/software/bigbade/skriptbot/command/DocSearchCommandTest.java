@@ -114,9 +114,10 @@ class DocSearchCommandTest {
                 MessageUtils.getErrorMessage("No Syntax Specified",
                         "Usage: **.doc subtext**")));
         when(MOCK_DATA_FETCHER.getDocsResults("test docs")).thenReturn(new JsonArray());
+        MOCKED_MESSAGE_UTILS.reset();
         DOC_SEARCH_COMMAND.onCommand(MOCK_TEXT_CHANNEL, new String[] { "test", "docs" });
         MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
-                MessageUtils.getErrorMessage("No results",
+                MessageUtils.getErrorMessage("No Results",
                         "No results were found for that query")));
     }
 

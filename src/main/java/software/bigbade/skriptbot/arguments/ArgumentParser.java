@@ -26,6 +26,10 @@ public class ArgumentParser {
                     checkArgumentLength(args, i);
                     builder.skUnityKey(args[i++]);
                     break;
+                case "--pastebinkey":
+                    checkArgumentLength(args, i);
+                    builder.pastebinKey(args[i++]);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown argument: " + args[i-1]);
             }

@@ -72,7 +72,7 @@ codeCoverageReport.dependsOn {
 }
 
 shadowJar {
-    classifier = ''
+    archiveClassifier.set('')
 
     minimize()
 }

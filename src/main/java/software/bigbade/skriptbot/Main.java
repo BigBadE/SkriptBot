@@ -7,6 +7,7 @@ import software.bigbade.skriptbot.commands.CommandManager;
 import software.bigbade.skriptbot.commands.DocSearchCommand;
 import software.bigbade.skriptbot.commands.DownloadCommand;
 import software.bigbade.skriptbot.commands.FormattingCommand;
+import software.bigbade.skriptbot.commands.PastebinCommand;
 import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
 import javax.security.auth.login.LoginException;
@@ -23,6 +24,8 @@ import javax.security.auth.login.LoginException;
  * Sets bot prefix, default is "."
  * --skUnityKey
  * Sets the SkUnity token
+ * -- pastebinKey
+ * Sets the Pastebin API key
  */
 public class Main {
     private static final CommandManager commandManager = new CommandManager();
@@ -42,7 +45,8 @@ public class Main {
     private static void registerCommands() {
         ResourceDataFetcher dataFetcher = new ResourceDataFetcher(arguments.getSkUnityKey());
         commandManager.registerCommand(new AddonSearchCommand(dataFetcher, arguments.getPrefix()));
-        commandManager.registerCommand(new DocSearchCommand(dataFetcher));
+        commandManager.registerCommand(new DocSearchCommand(dataFetcher, arguments.getPrefix()));
+        commandManager.registerCommand(new PastebinCommand(arguments.getPastebinKey(), arguments.getPrefix()));
         commandManager.registerCommand(new FormattingCommand());
         commandManager.registerCommand(new DownloadCommand());
     }

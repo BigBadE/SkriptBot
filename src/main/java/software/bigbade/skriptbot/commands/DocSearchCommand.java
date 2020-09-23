@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import software.bigbade.skriptbot.api.ICommand;
 import software.bigbade.skriptbot.utils.HTMLUtilities;
 import software.bigbade.skriptbot.utils.JsonKeys;
@@ -31,6 +32,7 @@ public class DocSearchCommand implements ICommand {
     @Getter
     private final String[] aliases = new String[]{"d", "doc", "docs", "documentation"};
     private final ResourceDataFetcher dataFetcher;
+    private final String prefix;
 
     /**
      * Converts string starting with a number that ends with a .
@@ -89,14 +91,14 @@ public class DocSearchCommand implements ICommand {
     public void onCommand(TextChannel channel, String[] args) {
         if (args.length == 0) {
             MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No Syntax Specified",
-                    "Usage: **.doc subtext**"));
+                    "Usage: **" + prefix + "doc subtext**"));
             return;
         }
 
         String query = String.join(" ", args);
         JsonArray array = dataFetcher.getDocsResults(query);
         if (array.isEmpty()) {
-            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No results",
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No Results",
                     "No results were found for that query"));
             return;
         }
@@ -132,7 +134,7 @@ public class DocSearchCommand implements ICommand {
     }
 
     @Override
-    public void onReaction(Message command, Message message, MessageReaction.ReactionEmote emote) {
+    public void onReaction(User reactor, Message command, Message message, MessageReaction.ReactionEmote emote) {
         if (!emote.isEmoji()) {
             return;
         }
@@ -144,11 +146,13 @@ public class DocSearchCommand implements ICommand {
                 return;
             }
             scrollCommand(message, array, found - 10);
+            message.removeReaction(ARROW_LEFT, reactor).queue();
         } else if (emote.getAsCodepoints().equals(ARROW_RIGHT)) {
             if (found >= array.size() - 10) {
                 return;
             }
             scrollCommand(message, array, found + 10);
+            message.removeReaction(ARROW_RIGHT, reactor).queue();
         } else {
             String codepoint = emote.getAsCodepoints();
             if (codepoint.length() != 16) {

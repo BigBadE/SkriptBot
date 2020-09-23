@@ -80,7 +80,7 @@ class ReactionListenerTest {
             }
 
             @Override
-            public void onReaction(Message command, Message message, MessageReaction.ReactionEmote emote) {
+            public void onReaction(User user, Message command, Message message, MessageReaction.ReactionEmote emote) {
                 Assertions.assertEquals("U+0000", emote.getAsCodepoints());
                 addedReaction = true;
             }

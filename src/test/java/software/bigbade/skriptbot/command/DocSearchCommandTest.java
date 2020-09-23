@@ -8,7 +8,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -37,11 +39,13 @@ class DocSearchCommandTest {
     private static final Message MOCK_COMMAND_MESSAGE = mock(Message.class);
 
     private static final ResourceDataFetcher MOCK_DATA_FETCHER = mock(ResourceDataFetcher.class);
-    private static final DocSearchCommand DOC_SEARCH_COMMAND = new DocSearchCommand(MOCK_DATA_FETCHER);
+    private static final DocSearchCommand DOC_SEARCH_COMMAND = new DocSearchCommand(MOCK_DATA_FETCHER, ".");
     private static final TextChannel MOCK_TEXT_CHANNEL = mock(TextChannel.class);
+    private static final User MOCK_USER = mock(User.class);
     private static final MessageReaction.ReactionEmote MOCKED_REACTION_EMOTE = mock(MessageReaction.ReactionEmote.class);
     private static final MockedStatic<MessageUtils> MOCKED_MESSAGE_UTILS = mockStatic(MessageUtils.class);
-
+    @SuppressWarnings("unchecked")
+    private static final AuditableRestAction<Void> MOCK_MESSAGE_DELETE = mock(AuditableRestAction.class);
     private static RestAction<Void> mockReactionDelete;
     private static MessageAction mockMessageAction;
 
@@ -135,14 +139,14 @@ class DocSearchCommandTest {
         verify(mockMessageAction).queue(argumentCaptor.capture());
         assertEmbedsEqual(TEST_MULTI_EMBED, captor.getValue());
         argumentCaptor.getValue().accept(MOCK_MESSAGE);
-        verify(mockReactionDelete, VerificationModeFactory.times(3)).queue();
+        verify(mockReactionDelete, VerificationModeFactory.times(5)).queue();
     }
 
     @Test
     void testDocsReaction() {
         EmbedBuilder builder = new EmbedBuilder();
         DOC_SEARCH_COMMAND.addDocsResponse(builder, TEST_ARRAY, 0);
-        DOC_SEARCH_COMMAND.onReaction(MOCK_COMMAND_MESSAGE, MOCK_MESSAGE, MOCKED_REACTION_EMOTE);
+        DOC_SEARCH_COMMAND.onReaction(MOCK_USER, MOCK_COMMAND_MESSAGE, MOCK_MESSAGE, MOCKED_REACTION_EMOTE);
         when(MOCK_MESSAGE.getEmbeds()).thenReturn(Collections.singletonList(builder.build()));
         when(MOCKED_REACTION_EMOTE.isEmoji()).thenReturn(true);
         when(MOCK_COMMAND_MESSAGE.getContentDisplay()).thenReturn(".d test docs");
@@ -151,11 +155,12 @@ class DocSearchCommandTest {
         when(MOCK_MESSAGE.getChannel()).thenReturn(MOCK_TEXT_CHANNEL);
         ArgumentCaptor<MessageEmbed> captor = ArgumentCaptor.forClass(MessageEmbed.class);
         when(MOCK_TEXT_CHANNEL.sendMessage(captor.capture())).thenReturn(mockMessageAction);
-        DOC_SEARCH_COMMAND.onReaction(MOCK_COMMAND_MESSAGE, MOCK_MESSAGE, MOCKED_REACTION_EMOTE);
+        when(MOCK_MESSAGE.delete()).thenReturn(MOCK_MESSAGE_DELETE);
+        DOC_SEARCH_COMMAND.onReaction(MOCK_USER, MOCK_COMMAND_MESSAGE, MOCK_MESSAGE, MOCKED_REACTION_EMOTE);
+
+        verify(MOCK_MESSAGE_DELETE).queue();
         assertEmbedsEqual(TEST_EMBED, captor.getValue());
         verify(mockMessageAction).queue();
-
-        DOC_SEARCH_COMMAND.onReaction(MOCK_COMMAND_MESSAGE, MOCK_MESSAGE, MOCKED_REACTION_EMOTE);
     }
 
     public static void assertEmbedsEqual(MessageEmbed expected, MessageEmbed actual) {

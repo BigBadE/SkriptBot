@@ -83,6 +83,9 @@ public class DocSearchCommand implements ICommand {
     }
 
     public static String getNumberEmote(int number) {
+        if(number < 0 || number > 9) {
+            throw new IllegalArgumentException("Number outside of range [0, 9]");
+        }
         return "U+3" + number + "U+fe0fU+20e3";
     }
 

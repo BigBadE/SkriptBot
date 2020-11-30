@@ -1,5 +1,6 @@
 package software.bigbade.skriptbot.command;
 
+import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.Jsoner;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.EmbedType;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 import software.bigbade.skriptbot.commands.AddonSearchCommand;
+import software.bigbade.skriptbot.testutils.TestMessage;
 import software.bigbade.skriptbot.utils.MessageUtils;
 import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
@@ -65,7 +67,7 @@ class AddonSearchCommandTest {
         Assertions.assertEquals("1.9 GB", AddonSearchCommand.humanReadableByteCountSI(1940000000));
     }
 
-    @SneakyThrows
+    @SneakyThrows(JsonException.class)
     @Test
     void testEmbedErrors() {
         MOCKED_MESSAGE_UTILS.when(() -> MessageUtils
@@ -85,16 +87,8 @@ class AddonSearchCommandTest {
         ADDON_SEARCH_COMMAND.onCommand(MOCK_MESSAGE_CHANNEL, new String[]{"test", "addon"});
         MOCKED_MESSAGE_UTILS.when(() -> MessageUtils.sendEmbedWithReaction(MOCK_MESSAGE_CHANNEL,
                 ArgumentMatchers.any(MessageEmbed.class))).thenAnswer(answer -> {
-            assertEmbedsEqual(TEST_EMBED, answer.getArgument(0));
+            TestMessage.assertEmbedsEqual(TEST_EMBED, answer.getArgument(0));
             return null;
         });
-    }
-
-    public static void assertEmbedsEqual(MessageEmbed expected, MessageEmbed actual) {
-        Assertions.assertEquals(expected.getTitle(), actual.getTitle());
-        Assertions.assertEquals(expected.getUrl(), actual.getUrl());
-        for(int i = 0; i < expected.getFields().size(); i++) {
-            Assertions.assertEquals(expected.getFields().get(i), actual.getFields().get(i));
-        }
     }
 }

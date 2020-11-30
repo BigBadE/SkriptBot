@@ -41,10 +41,10 @@ public final class HTMLUtilities {
             }
             Character output = LOOKUP_MAP.get(found.toString());
             if(output == null) {
+                result.append('&').append(found.toString());
                 if(input.charAt(i) == ';') {
                     result.append(';');
                 }
-                result.append(found.toString());
             } else {
                 result.append(output);
             }

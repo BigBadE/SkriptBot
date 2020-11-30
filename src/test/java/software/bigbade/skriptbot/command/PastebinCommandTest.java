@@ -113,7 +113,6 @@ class PastebinCommandTest {
                         "There was no attached file to that message.")));
     }
 
-    @SneakyThrows
     @Order(2)
     @Test
     void testUploadPastebin() {

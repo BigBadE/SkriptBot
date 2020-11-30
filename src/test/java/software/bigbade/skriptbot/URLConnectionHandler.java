@@ -62,7 +62,6 @@ public class URLConnectionHandler extends URLStreamHandler {
             };
         }
 
-        @SneakyThrows
         @Override
         public void connect() {
             contentLength = this.fixedContentLength;

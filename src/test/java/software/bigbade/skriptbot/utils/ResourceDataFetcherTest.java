@@ -1,5 +1,6 @@
 package software.bigbade.skriptbot.utils;
 
+import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsonable;
 import com.github.cliftonlabs.json_simple.Jsoner;
@@ -26,7 +27,7 @@ class ResourceDataFetcherTest {
 
     private static final String TEST_JSON = "{\"id\":1,\"completed\":false,\"title\":\"delectus aut autem\",\"userId\":1}";
 
-    @SneakyThrows
+    @SneakyThrows(JsonException.class)
     @BeforeAll
     static void setupDataFetcher() {
         JsonObject topData = (JsonObject) Jsoner.deserialize("{" +
@@ -110,7 +111,7 @@ class ResourceDataFetcherTest {
         Assertions.assertTrue(dataFetcher.getDocsResults("test addon").isEmpty());
     }
 
-    @SneakyThrows
+    @SneakyThrows(JsonException.class)
     @Order(6)
     @Test
     void testEmptyAddonResults() {
@@ -120,7 +121,7 @@ class ResourceDataFetcherTest {
     }
 
     @Order(4)
-    @SneakyThrows
+    @SneakyThrows(JsonException.class)
     @Test
     void testZeroResultsReturnsEmptyArray() {
         //Test JSON output
@@ -137,8 +138,8 @@ class ResourceDataFetcherTest {
         Assertions.assertTrue(dataFetcher.getDocsResults("test addon").isEmpty());
     }
 
+    @SneakyThrows(JsonException.class)
     @Order(5)
-    @SneakyThrows
     @Test
     void testGetsDocsResults() {
         //Test JSON output

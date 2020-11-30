@@ -17,7 +17,7 @@ public class UUIDCommand implements ICommand {
             null, null, null, null,
             new MessageEmbed.Footer("UUID", null, null), null,
             Arrays.asList(new MessageEmbed.Field("Why?",
-                            "UUIDs are a much better way to store your variables, as a player's UUID will never " +
+                            "UUIDs are much more preferred way to store player's sensitive info, as a player's UUID will never " +
                                     "change, whereas their name can. UUIDs can be used for any type of variable, in the " +
                                     "same way as `%player%` is. Your player's money/stats can be lost if they change their in " +
                                     "game name when `%player%` is used.", false),

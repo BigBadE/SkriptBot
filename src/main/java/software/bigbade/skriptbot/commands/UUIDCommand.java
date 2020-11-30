@@ -25,10 +25,17 @@ public class UUIDCommand implements ICommand {
                             "You use this in the same was as using `%player%`, just with " +
                                     "`'s uuid` on the end, so `player's uuid`!", false),
                     new MessageEmbed.Field("Common situations which can use UUID's instead",
-                            "```vb\n" +
-                                    "{stats::%player%} -> {stats::%player's uuid%}\n" +
+                            "```yaml\n" +
+                                    "{stats::%player%::kills} -> {stats::%player's uuid%::kills}\n" +
                                     "{vanish::%player%} -> {vanish::%uuid of player%}\n" +
-                                    "{generator::%player%::*} -> {generator::%player's uuid%::*}```", false)));
+                                    "{generator::%player%::*} -> {generator::%player's uuid%::*}```", false),
+                    new MessageEmbed.Field("Extra Notes",
+                            "There is currently an issue where you cannot use `{var::%{_p}'s uuid%}` in functions, " +
+                                    "a workaround this is to use something similar to this: " +
+                                    "```vb\n" +
+                                    "function addKill(p: player):\n" +
+                                    "   set {_u} to {_p}'s uuid\n" +
+                                    "   add 1 to {stats::%{_u}%::kills}```", false)));
     @Getter
     private final String[] aliases = new String[]{"uuid", "uuids"};
 

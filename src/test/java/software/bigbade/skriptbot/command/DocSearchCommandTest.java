@@ -13,24 +13,21 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.bigbade.skriptbot.commands.DocSearchCommand;
 import software.bigbade.skriptbot.testutils.TestChannel;
+import software.bigbade.skriptbot.testutils.TestIDHandler;
 import software.bigbade.skriptbot.testutils.TestMessage;
+import software.bigbade.skriptbot.testutils.TestResourceDataFetcher;
 import software.bigbade.skriptbot.testutils.TestUser;
 import software.bigbade.skriptbot.utils.MessageUtils;
-import software.bigbade.skriptbot.utils.ResourceDataFetcher;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class DocSearchCommandTest {
     private static final TestResourceDataFetcher TEST_DATA_FETCHER = new TestResourceDataFetcher();
     private static final DocSearchCommand DOC_SEARCH_COMMAND = new DocSearchCommand(TEST_DATA_FETCHER, ".");
 
     private static final TestChannel TEST_TEXT_CHANNEL = new TestChannel();
-    private static final User TEST_USER = new TestUser();
-    private static final MessageReaction.ReactionEmote MOCKED_REACTION_EMOTE = mock(MessageReaction.ReactionEmote.class);
+    private static final User TEST_USER = new TestUser("Test User");
+
+    private static final MessageReaction.ReactionEmote REACTION_EMOTE = MessageReaction.ReactionEmote.fromUnicode(
+            DocSearchCommand.getNumberEmote(0), TestChannel.TEST_JDA);
 
     private static final MessageEmbed TEST_EMBED = new EmbedBuilder().setTitle("Test Docs",
             "https://docs.skunity.com/syntax/search/Test+Docs")
@@ -41,11 +38,10 @@ class DocSearchCommandTest {
             .addField("Requires", "Skript", true)
             .build();
 
-    private static final MessageEmbed TEST_MULTI_EMBED = new EmbedBuilder()
+    private static final EmbedBuilder TEST_MULTI_EMBED = new EmbedBuilder()
             .setTitle("Found Results", "https://docs.skunity.com/syntax/search/test+3")
             .addField("0. Test Docs (type)", "```test[s]```", false)
-            .addField("1. Second Docs (type)", "```second type[s]```", false)
-            .build();
+            .addField("1. Second Docs (type)", "```second type[s]```", false);
 
     private static JsonArray TEST_ARRAY;
 
@@ -83,25 +79,31 @@ class DocSearchCommandTest {
 
     @Test
     void testCommandErrorMessages() {
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage("No Syntax Specified",
+        String id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage(id, "No Syntax Specified",
                 "Usage: **.doc subtext**"), TEST_TEXT_CHANNEL));
-        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, new String[0]);
+        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[0]);
         TEST_TEXT_CHANNEL.verify();
 
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage("No Results",
+        id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage(id, "No Results",
                 "No results were found for that query"), TEST_TEXT_CHANNEL));
-        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, new String[]{"test", "1"});
+        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[]{"test", "1"});
         TEST_TEXT_CHANNEL.verify();
     }
 
     @Test
     void testCommandBasicDocs() {
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(TEST_EMBED, TEST_TEXT_CHANNEL));
-        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, new String[]{"test", "2"});
+        String id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(new EmbedBuilder(TEST_EMBED).setFooter(id).build(),
+                TEST_TEXT_CHANNEL));
+        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[]{"test", "2"});
         TEST_TEXT_CHANNEL.verify();
 
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(TEST_MULTI_EMBED, TEST_TEXT_CHANNEL));
-        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, new String[]{"test", "3"});
+        id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(new EmbedBuilder(TEST_MULTI_EMBED).setFooter(id).build(),
+                TEST_TEXT_CHANNEL));
+        DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[]{"test", "3"});
         TEST_TEXT_CHANNEL.verify();
     }
 
@@ -110,37 +112,22 @@ class DocSearchCommandTest {
         EmbedBuilder builder = new EmbedBuilder();
         DOC_SEARCH_COMMAND.addDocsResponse(builder, TEST_ARRAY, 0);
 
-        TestMessage testMessage = new TestMessage("", TEST_TEXT_CHANNEL);
-        TestMessage commandMessage = new TestMessage("", TEST_TEXT_CHANNEL);
-        DOC_SEARCH_COMMAND.onReaction(TEST_USER, commandMessage, testMessage, MOCKED_REACTION_EMOTE);
+        TestMessage testMessage = new TestMessage(builder.build(), TEST_TEXT_CHANNEL);
+        TestMessage commandMessage = new TestMessage(".d test 2", TEST_TEXT_CHANNEL);
+
+        DOC_SEARCH_COMMAND.onReaction(TEST_USER, commandMessage, testMessage, REACTION_EMOTE);
+
         testMessage.verify(false);
         commandMessage.verify(false);
         testMessage = new TestMessage(builder.build(), TEST_TEXT_CHANNEL);
         commandMessage = new TestMessage(".d test 3", TEST_TEXT_CHANNEL);
-        when(MOCKED_REACTION_EMOTE.isEmoji()).thenReturn(true);
 
-        when(MOCKED_REACTION_EMOTE.getAsCodepoints()).thenReturn(DocSearchCommand.getNumberEmote(0));
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(
+                TEST_EMBED,
+                TEST_TEXT_CHANNEL));
 
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(TEST_EMBED, TEST_TEXT_CHANNEL));
-
-        DOC_SEARCH_COMMAND.onReaction(TEST_USER, commandMessage, testMessage, MOCKED_REACTION_EMOTE);
+        DOC_SEARCH_COMMAND.onReaction(TEST_USER, commandMessage, testMessage, REACTION_EMOTE);
+        TEST_TEXT_CHANNEL.verify();
         testMessage.verify(true);
-    }
-}
-
-class TestResourceDataFetcher extends ResourceDataFetcher {
-    private final Map<String, JsonArray> results = new HashMap<>();
-
-    public TestResourceDataFetcher() {
-        super("testKey");
-    }
-
-    public void addResult(String query, JsonArray result) {
-        results.put(query, result);
-    }
-
-    @Override
-    public JsonArray getDocsResults(String query) {
-        return results.get(query);
     }
 }

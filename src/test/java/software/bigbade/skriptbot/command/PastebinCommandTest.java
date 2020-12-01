@@ -1,137 +1,108 @@
 package software.bigbade.skriptbot.command;
 
-import lombok.SneakyThrows;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.internal.utils.JDALogger;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.MockedStatic;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.slf4j.Logger;
 import software.bigbade.skriptbot.URLConnectionHandler;
 import software.bigbade.skriptbot.commands.PastebinCommand;
+import software.bigbade.skriptbot.testutils.TestAttachment;
+import software.bigbade.skriptbot.testutils.TestChannel;
+import software.bigbade.skriptbot.testutils.TestIDHandler;
+import software.bigbade.skriptbot.testutils.TestMessage;
+import software.bigbade.skriptbot.testutils.TestUser;
 import software.bigbade.skriptbot.utils.MessageUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PastebinCommandTest {
     private static final PastebinCommand PASTEBIN_COMMAND = new PastebinCommand("key", ".");
 
-    private static final TextChannel MOCK_TEXT_CHANNEL = mock(TextChannel.class);
-    @SuppressWarnings("unchecked")
-    private static final RestAction<Message> MOCK_GET_MESSAGE = mock(RestAction.class);
-    private static final User MOCKED_USER = mock(User.class);
-    private static final Message MOCK_FOUND_MESSAGE = mock(Message.class);
-    private static final Message.Attachment MOCK_FOUND_ATTACHMENT = mock(Message.Attachment.class);
-    @SuppressWarnings("unchecked")
-    private static final CompletableFuture<InputStream> MOCK_ATTACHMENT_STREAM = mock(CompletableFuture.class);
+    private static final TestChannel TEST_TEXT_CHANNEL = new TestChannel();
+    private static final TestMessage TEST_UPLOAD_MESSAGE = new TestMessage("", TEST_TEXT_CHANNEL);
 
-    private static final MockedStatic<MessageUtils> MOCKED_MESSAGE_UTILS = mockStatic(MessageUtils.class);
-
-
-    private static final String[] COMMAND_ARGS = new String[] { "fakeid" };
-
-    @SuppressWarnings("unchecked")
-    private static final ArgumentCaptor<Consumer<InputStream>> INPUT_STREAM_CAPTOR = ArgumentCaptor.forClass(Consumer.class);
-    @SuppressWarnings("unchecked")
-    private static final ArgumentCaptor<Consumer<Message>> MESSAGE_CAPTOR = ArgumentCaptor.forClass(Consumer.class);
+    private static final String[] COMMAND_ARGS = new String[]{"fakeid"};
 
     private static final String TEST_PASTE_VALUE = "test paste";
-    private static final String ENCODED_POST_REQUEST = "api_option=paste&api_paste_private=1" +
-            "&api_paste_name=Test%27s+File%3A+test.txt&api_paste_expire_date=1D" +
-            "&api_paste_format=.txt&api_paste_code=test+paste&api_dev_key=key";
+    private static final String ENCODED_POST_REQUEST = "api_option=paste&api_paste_private=1&api_paste_name=Test_User%27s+File%3A+test.txt&api_paste_expire_date=1D&api_paste_format=txt&api_paste_code=test+paste&api_dev_key=key";
 
     @BeforeAll
-    static void setupTests() {
-        MOCKED_MESSAGE_UTILS.when(() -> MessageUtils
-                .getErrorMessage(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
-                .thenCallRealMethod();
-        when(MOCK_TEXT_CHANNEL.retrieveMessageById(ArgumentMatchers.anyString())).thenReturn(MOCK_GET_MESSAGE);
-        when(MOCK_GET_MESSAGE.onErrorMap(ArgumentMatchers.any())).thenReturn(MOCK_GET_MESSAGE);
-        when(MOCK_FOUND_MESSAGE.getAttachments()).thenReturn(new ArrayList<>());
-        when(MOCK_FOUND_ATTACHMENT.retrieveInputStream()).thenReturn(MOCK_ATTACHMENT_STREAM);
-        when(MOCK_FOUND_MESSAGE.getAuthor()).thenReturn(MOCKED_USER);
-        when(MOCKED_USER.getName()).thenReturn("Test");
-        when(MOCK_FOUND_ATTACHMENT.getFileName()).thenReturn("test.txt");
-        when(MOCK_FOUND_ATTACHMENT.getFileExtension()).thenReturn(".txt");
-        when(MOCK_ATTACHMENT_STREAM.thenAccept(INPUT_STREAM_CAPTOR.capture())).thenAnswer(input -> {
-            input.<Consumer<InputStream>>getArgument(0)
-                    .accept(new ByteArrayInputStream(TEST_PASTE_VALUE.getBytes(StandardCharsets.UTF_8)));
-            return null;
-        });
-
+    static void setupLogger() {
         mockStatic(JDALogger.class).when(() -> JDALogger.getLog(ArgumentMatchers.any(Class.class)))
                 .thenReturn(mock(Logger.class));
-    }
 
-    @AfterAll
-    static void closeMockedStatic() {
-        MOCKED_MESSAGE_UTILS.close();
+        TEST_UPLOAD_MESSAGE.setAuthor(new TestUser("Test_User"));
+        TEST_UPLOAD_MESSAGE.addAttachment(new TestAttachment("test.txt", 1,
+                new ByteArrayInputStream(TEST_PASTE_VALUE.getBytes(StandardCharsets.UTF_8))));
     }
 
     @Order(1)
     @Test
     void testCommandErrors() {
-        PASTEBIN_COMMAND.onCommand(MOCK_TEXT_CHANNEL, new String[0]);
-        MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
-                MessageUtils.getErrorMessage("Invalid Arguments",
-                        "Usage: **.pastebin (message id)**\nTo get a Message ID, enable" +
-                                "developer mode in Discord settings, right click the message, and click \"Copy ID\"")));
-        PASTEBIN_COMMAND.onCommand(MOCK_TEXT_CHANNEL, COMMAND_ARGS);
-        verify(MOCK_GET_MESSAGE, VerificationModeFactory.atLeastOnce()).queue(MESSAGE_CAPTOR.capture());
-        MESSAGE_CAPTOR.getValue().accept(null);
-        MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
-                MessageUtils.getErrorMessage("No Message Found",
-                        "There was no message in this channel with that id.")));
-        PASTEBIN_COMMAND.onCommand(MOCK_TEXT_CHANNEL, COMMAND_ARGS);
-        verify(MOCK_GET_MESSAGE, VerificationModeFactory.atLeastOnce()).queue(MESSAGE_CAPTOR.capture());
-        MESSAGE_CAPTOR.getValue().accept(MOCK_FOUND_MESSAGE);
-        MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
-                MessageUtils.getErrorMessage("No File Found",
-                        "There was no attached file to that message.")));
+        String id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage(id, "Invalid Arguments",
+                "Usage: **.pastebin (message id)**\nTo get a Message ID, enable" +
+                        "developer mode in Discord settings, right click the message, and click \"Copy ID\""), TEST_TEXT_CHANNEL));
+        PASTEBIN_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[0]);
+        TEST_TEXT_CHANNEL.verify();
+
+        id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage(id, "No Message Found",
+                "There was no message in this channel with that id."), TEST_TEXT_CHANNEL));
+        PASTEBIN_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, COMMAND_ARGS);
+        TEST_TEXT_CHANNEL.verify();
+
+        TEST_TEXT_CHANNEL.setRetrievedMessage(new TestMessage("", TEST_TEXT_CHANNEL));
+
+        id = TestIDHandler.getId() + "";
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(MessageUtils.getErrorMessage(id, "No File Found",
+                "There was no attached file to that message."), TEST_TEXT_CHANNEL));
+        PASTEBIN_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, COMMAND_ARGS);
+        TEST_TEXT_CHANNEL.verify();
     }
 
     @Order(2)
     @Test
-    void testUploadPastebin() {
-        when(MOCK_FOUND_MESSAGE.getAttachments()).thenReturn(Collections.singletonList(MOCK_FOUND_ATTACHMENT));
+    void testPastebinError() {
+        TEST_TEXT_CHANNEL.setRetrievedMessage(TEST_UPLOAD_MESSAGE);
+
+        String id = TestIDHandler.getId() + "";
+        TestMessage outputMessage = new TestMessage(MessageUtils.getErrorMessage(id, "Error Creating Paste",
+                "Error: Bad API Response Test"), TEST_TEXT_CHANNEL);
         URLConnectionHandler.resetValues("Bad API Response Test", ENCODED_POST_REQUEST, null);
-        callCommandWithAttachment();
-        MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
-                MessageUtils.getErrorMessage("Error Creating Paste",
-                        "Error: Bad API Response Test")));
-        URLConnectionHandler.resetValues("https://pastebin/paste", ENCODED_POST_REQUEST, null);
-        callCommandWithAttachment();
-        MOCKED_MESSAGE_UTILS.verify(() -> MessageUtils.sendEmbedWithReaction(MOCK_TEXT_CHANNEL,
-                new EmbedBuilder().setTitle("Pastebin'd file")
-                        .setDescription("https://pastebin/paste").build()));
+        TEST_TEXT_CHANNEL.expectMessage(outputMessage);
+
+        PASTEBIN_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, COMMAND_ARGS);
+
+        outputMessage.verify(false);
+        TEST_TEXT_CHANNEL.verify();
     }
 
-    private void callCommandWithAttachment() {
-        PASTEBIN_COMMAND.onCommand(MOCK_TEXT_CHANNEL, COMMAND_ARGS);
-        verify(MOCK_GET_MESSAGE, VerificationModeFactory.atLeastOnce()).queue(MESSAGE_CAPTOR.capture());
-        MESSAGE_CAPTOR.getValue().accept(MOCK_FOUND_MESSAGE);
+    @Order(3)
+    @Test
+    void testUploadPastebin() {
+        String id = TestIDHandler.getId() + "";
+        URLConnectionHandler.resetValues("https://pastebin/paste", ENCODED_POST_REQUEST, null);
+        TestMessage outputMessage = new TestMessage(new EmbedBuilder().setTitle("Pastebin'd file")
+                .setDescription("https://pastebin/paste").setFooter(id).build(), TEST_TEXT_CHANNEL);
+        TEST_TEXT_CHANNEL.expectMessage(outputMessage);
+        TEST_UPLOAD_MESSAGE.addAttachment(new TestAttachment("test.txt", 1,
+                new ByteArrayInputStream(TEST_PASTE_VALUE.getBytes(StandardCharsets.UTF_8))));
+        TEST_TEXT_CHANNEL.setRetrievedMessage(TEST_UPLOAD_MESSAGE);
+
+        PASTEBIN_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, COMMAND_ARGS);
+
+        outputMessage.verify(false);
+        TEST_TEXT_CHANNEL.verify();
     }
 }

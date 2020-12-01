@@ -1,7 +1,6 @@
 package software.bigbade.skriptbot;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.Nonnull;

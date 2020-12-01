@@ -15,10 +15,10 @@ public final class MessageUtils {
         channel.sendMessage(message).queue(response -> response.addReaction(DELETE_REACTION).queue());
     }
 
-    public static MessageEmbed getErrorMessage(String title, String description) {
+    public static MessageEmbed getErrorMessage(String id, String title, String description) {
         return new MessageEmbed(null, title, description, EmbedType.RICH, null, Color.RED.getRGB(),
                 new MessageEmbed.Thumbnail("https://i.imgur.com/AjlWaz5.png", null, 0, 0),
                 null, null, null,
-                new MessageEmbed.Footer("Error", null, null), null, Collections.emptyList());
+                new MessageEmbed.Footer("Error | " + id, null, null), null, Collections.emptyList());
     }
 }

@@ -1,12 +1,9 @@
 package software.bigbade.skriptbot.listener;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.internal.entities.ReceivedMessage;
 import org.junit.jupiter.api.Assertions;
@@ -14,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.bigbade.skriptbot.api.ICommand;
 import software.bigbade.skriptbot.listeners.CommandListener;
+import software.bigbade.skriptbot.testutils.TestUser;
 
 import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class CommandListenerTest {
     private static final JDA jda = mock(JDA.class);
@@ -28,7 +25,7 @@ class CommandListenerTest {
     static {
         ICommand command = new ICommand() {
             @Override
-            public void onCommand(TextChannel channel, String[] args) {
+            public void onCommand(TextChannel channel, String id, String[] args) {
                 if(args.length == 3 && args[0].equals("all") && args[1].equals("the") && args[2].equals("args")) {
                     commandRan = true;
                 }
@@ -49,10 +46,10 @@ class CommandListenerTest {
 
     @Test
     void wrongCommandReceivedTest() {
-        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent(".test", true)));
-        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent("test", false)));
-        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent(".tes", false)));
-        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent(".testing", false)));
+        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent(".test all the", true)));
+        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent("test all the args", false)));
+        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent(".tes all the args", false)));
+        listener.onMessageReceived(new MessageReceivedEvent(jda, 0, constructEvent(".testing all the args", false)));
         Assertions.assertFalse(commandRan);
     }
 
@@ -63,11 +60,9 @@ class CommandListenerTest {
     }
 
     private Message constructEvent(String message, boolean isBot) {
-        User author = mock(User.class);
-        when(author.isBot()).thenReturn(isBot);
-        MessageChannel channel = mock(TextChannel.class);
-        when(channel.getType()).thenReturn(ChannelType.TEXT);
-        return new ReceivedMessage(0, channel, MessageType.DEFAULT, false,
+        TestUser author = new TestUser("TestUser");
+        author.setBot(isBot);
+        return new ReceivedMessage(0, null, MessageType.DEFAULT, false,
                 false, null, null, false, false, message, null,
                 author, null, null, null, Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList(), 0);

@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import software.bigbade.skriptbot.api.ICommand;
+import software.bigbade.skriptbot.api.IDataFetcher;
 import software.bigbade.skriptbot.utils.JsonKeys;
 import software.bigbade.skriptbot.utils.MessageUtils;
-import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
 import java.awt.Color;
 import java.text.CharacterIterator;
@@ -22,25 +22,25 @@ import java.util.Optional;
 public class AddonSearchCommand implements ICommand {
     @Getter
     private final String[] aliases = new String[]{"a", "addon", "addons"};
-    private final ResourceDataFetcher dataFetcher;
+    private final IDataFetcher dataFetcher;
     private final String prefix;
 
     @Override
-    public void onCommand(TextChannel channel, String[] args) {
+    public void onCommand(TextChannel channel, String id, String[] args) {
         if (args.length == 0) {
             MessageUtils.sendEmbedWithReaction(channel,
-                    MessageUtils.getErrorMessage("No Addon Specified",
+                    MessageUtils.getErrorMessage(id, "No Addon Specified",
                             "Usage: **" + prefix + "a skript-mirror**"));
             return;
         }
         Optional<String> addon = dataFetcher.getAddon(String.join(" ", args).toLowerCase());
         if (!addon.isPresent()) {
             MessageUtils.sendEmbedWithReaction(channel,
-                    MessageUtils.getErrorMessage("No Addon Found",
+                    MessageUtils.getErrorMessage(id, "No Addon Found",
                             "No addons were found with that search"));
             return;
         }
-        JsonObject found = (JsonObject) ResourceDataFetcher.readData("https://api.skripttools.net/v4/addons/" + addon.get())
+        JsonObject found = (JsonObject) dataFetcher.readData("https://api.skripttools.net/v4/addons/" + addon.get())
                 .orElseThrow(() -> new IllegalStateException("Addon in list has invalid URL"));
         if(!found.getBoolean(JsonKeys.SUCCESS.getKey())) {
             throw new IllegalStateException("Error getting file: " + found.getString(JsonKeys.ERROR.getKey()));
@@ -56,7 +56,7 @@ public class AddonSearchCommand implements ICommand {
             if(i == authors.size()-1) {
                 authorBuilder.append(author);
             } else if(i == authors.size()-2) {
-                authorBuilder.append(author).append(" and ");
+                authorBuilder.append(author).append(", and ");
             } else {
                 authorBuilder.append(author).append(", ");
             }

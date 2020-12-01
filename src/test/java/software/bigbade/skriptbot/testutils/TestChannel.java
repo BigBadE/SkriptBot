@@ -1,5 +1,6 @@
 package software.bigbade.skriptbot.testutils;
 
+import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -36,14 +37,19 @@ import java.util.List;
  * to prevent false positives due to incorrect return values.
  */
 public class TestChannel implements TextChannel {
+    public static final JDA TEST_JDA = new TestJDA();
+
     private static final String ERROR_TEXT = "Unimplemented test method!";
 
     private final List<TestMessage> expectedMessages = new ArrayList<>();
 
+    @Setter
+    private Message retrievedMessage = null;
+
     @Nonnull
     @Override
     public MessageAction sendMessage(@Nonnull MessageEmbed embed) {
-        TestMessage.assertEmbedsEqual(embed, expectedMessages.get(expectedMessages.size()-1).getEmbeds().get(0));
+        TestMessage.assertEmbedsEqual(expectedMessages.get(expectedMessages.size()-1).getEmbeds().get(0), embed);
         expectedMessages.remove(expectedMessages.size()-1);
         return new TestMessageAction(embed, this);
     }
@@ -54,6 +60,14 @@ public class TestChannel implements TextChannel {
 
     public void verify() {
         Assertions.assertTrue(expectedMessages.isEmpty());
+    }
+
+    @Nonnull
+    @Override
+    public RestAction<Message> retrieveMessageById(@Nonnull String messageId) {
+        Message retrieved = retrievedMessage;
+        retrievedMessage = null;
+        return new TestRestAction<>(retrieved);
     }
 
     @Nullable
@@ -125,7 +139,7 @@ public class TestChannel implements TextChannel {
     @Nonnull
     @Override
     public JDA getJDA() {
-        throw new IllegalStateException(ERROR_TEXT);
+        return TEST_JDA;
     }
 
     @Nullable
@@ -277,6 +291,6 @@ public class TestChannel implements TextChannel {
 
     @Override
     public long getIdLong() {
-        throw new IllegalStateException(ERROR_TEXT);
+        return TestIDHandler.getId();
     }
 }

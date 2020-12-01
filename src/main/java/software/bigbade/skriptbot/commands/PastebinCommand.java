@@ -22,10 +22,10 @@ public class PastebinCommand implements ICommand {
     private final String prefix;
 
     @Override
-    public void onCommand(TextChannel channel, String[] args) {
+    public void onCommand(TextChannel channel, String id, String[] args) {
         if(args.length != 1) {
             MessageUtils.sendEmbedWithReaction(
-                    channel, MessageUtils.getErrorMessage("Invalid Arguments",
+                    channel, MessageUtils.getErrorMessage(id, "Invalid Arguments",
                             "Usage: **" + prefix + "pastebin (message id)**\nTo get a Message ID, enable" +
                                     "developer mode in Discord settings, right click the message, and click \"Copy ID\""));
             return;
@@ -33,23 +33,23 @@ public class PastebinCommand implements ICommand {
 
         channel.retrieveMessageById(args[0]).onErrorMap(error -> null).queue(message -> {
             if(message == null) {
-                MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No Message Found",
+                MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage(id, "No Message Found",
                         "There was no message in this channel with that id."));
                 return;
             }
             if(message.getAttachments().isEmpty()) {
-                MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("No File Found",
+                MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage(id, "No File Found",
                         "There was no attached file to that message."));
                 return;
             }
             message.getAttachments().get(0).retrieveInputStream().thenAccept(inputStream -> {
                 String input = HTTPUtilities.readInputStream(inputStream);
-                sendPastebin(channel, message, input);
+                sendPastebin(channel, message, id, input);
             });
         });
     }
 
-    private void sendPastebin(TextChannel channel, Message message, String input) {
+    private void sendPastebin(TextChannel channel, Message message, String id, String input) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put("api_option", "paste");
         arguments.put("api_paste_private", "1");
@@ -62,19 +62,19 @@ public class PastebinCommand implements ICommand {
         Optional<InputStream> response =
                 HTTPUtilities.sendPostRequest("https://pastebin.com/api/api_post.php", arguments);
         if(!response.isPresent()) {
-            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("Error Creating Paste",
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage(id ,"Error Creating Paste",
                     "An unknown error occurred."));
             return;
         }
         String returned = HTTPUtilities.readInputStream(response.get());
         //Check if it starts with "Bad API response"
         if(returned.charAt(0) == 'B') {
-            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage("Error Creating Paste",
+            MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage(id, "Error Creating Paste",
                     "Error: " + returned));
             return;
         }
 
         MessageUtils.sendEmbedWithReaction(channel, new EmbedBuilder().setTitle("Pastebin'd file")
-                .setDescription(returned).build());
+                .setDescription(returned).setFooter(id).build());
     }
 }

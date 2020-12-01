@@ -14,9 +14,12 @@ import software.bigbade.skriptbot.utils.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 public class ReactionListener extends ListenerAdapter {
+    private static final Pattern MESSAGE_ID_SPLITTER = Pattern.compile("\\|");
     private final List<ICommand> commands;
     private final String prefix;
     @Setter
@@ -35,20 +38,24 @@ public class ReactionListener extends ListenerAdapter {
     }
 
     private void handleReactionMessage(Message message, User user, MessageReaction.ReactionEmote reaction) {
-        if (!message.getAuthor().equals(jda.getSelfUser())) {
+        if (!message.getAuthor().equals(jda.getSelfUser()) || message.getEmbeds().isEmpty()) {
             return;
         }
-        message.getChannel().getHistoryBefore(message, 1).queue(history -> {
-            if (history.isEmpty() || !history.getRetrievedHistory().get(0).getAuthor().equals(user)) {
-                return;
-            }
 
+        String id = Objects.requireNonNull(message.getEmbeds().get(0).getFooter()).getText();
+
+        assert id != null;
+
+        if(id.indexOf('|') != -1) {
+            id = MESSAGE_ID_SPLITTER.split(id, 2)[1].substring(1);
+        }
+
+        message.getChannel().retrieveMessageById(id).queue(lastMessage -> {
             if (reaction.getAsCodepoints().equals(MessageUtils.DELETE_REACTION)) {
                 message.delete().queue();
                 return;
             }
 
-            Message lastMessage = history.getRetrievedHistory().get(0);
             String foundMessage = lastMessage.getContentStripped();
             if (!foundMessage.startsWith(prefix)) {
                 return;

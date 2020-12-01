@@ -1,6 +1,7 @@
 package software.bigbade.skriptbot.listeners;
 
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import software.bigbade.skriptbot.api.ICommand;
@@ -43,7 +44,7 @@ public class CommandListener extends ListenerAdapter {
                     String arg = tokenizer.nextToken();
                     args[i] = arg;
                 }
-                command.onCommand(event.getTextChannel(), args);
+                command.onCommand((TextChannel) event.getChannel(), event.getMessageId(), args);
                 return;
             }
         }

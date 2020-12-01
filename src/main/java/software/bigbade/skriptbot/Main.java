@@ -8,6 +8,7 @@ import software.bigbade.skriptbot.commands.DocSearchCommand;
 import software.bigbade.skriptbot.commands.DownloadCommand;
 import software.bigbade.skriptbot.commands.FormattingCommand;
 import software.bigbade.skriptbot.commands.PastebinCommand;
+import software.bigbade.skriptbot.commands.UUIDCommand;
 import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
 import javax.security.auth.login.LoginException;
@@ -47,6 +48,7 @@ public class Main {
         commandManager.registerCommand(new AddonSearchCommand(dataFetcher, arguments.getPrefix()));
         commandManager.registerCommand(new DocSearchCommand(dataFetcher, arguments.getPrefix()));
         commandManager.registerCommand(new PastebinCommand(arguments.getPastebinKey(), arguments.getPrefix()));
+        commandManager.registerCommand(new UUIDCommand());
         commandManager.registerCommand(new FormattingCommand());
         commandManager.registerCommand(new DownloadCommand());
     }

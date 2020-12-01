@@ -1,6 +1,7 @@
 package software.bigbade.skriptbot.testutils;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -21,8 +22,6 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.pagination.ReactionPaginationAction;
-import net.dv8tion.jda.internal.JDAImpl;
-import net.dv8tion.jda.internal.entities.EmoteImpl;
 import org.apache.commons.collections4.Bag;
 import org.junit.jupiter.api.Assertions;
 
@@ -43,10 +42,14 @@ public class TestMessage implements Message {
     private final List<MessageEmbed> embeds = new ArrayList<>();
 
     @Getter
-    private final List<Emote> emotes = new ArrayList<>();
+    private final List<Attachment> attachments = new ArrayList<>();
 
     @Getter
     private final TextChannel channel;
+
+    @Setter
+    @Getter
+    private TestUser author;
 
     public boolean deleted = false;
 
@@ -63,16 +66,7 @@ public class TestMessage implements Message {
         embeds.add(embed);
     }
 
-    public TestMessage(MessageEmbed embed, TextChannel channel, int expectedReactions) {
-        this.channel = channel;
-        this.expectedReactions = expectedReactions;
-        text = "";
-        embeds.add(embed);
-    }
-
-    public void addEmbed(MessageEmbed embed) {
-        embeds.add(embed);
-    }
+    public void addAttachment(Attachment attachment) { attachments.add(attachment); }
 
     public void verify(boolean isDeleted) {
         Assertions.assertEquals(0, expectedReactions);
@@ -83,7 +77,10 @@ public class TestMessage implements Message {
         Assertions.assertEquals(expected.getTitle(), actual.getTitle());
         Assertions.assertEquals(expected.getUrl(), actual.getUrl());
         for (int i = 0; i < expected.getFields().size(); i++) {
-            Assertions.assertEquals(expected.getFields().get(i), actual.getFields().get(i));
+            MessageEmbed.Field first = expected.getFields().get(i);
+            MessageEmbed.Field second = actual.getFields().get(i);
+            Assertions.assertEquals(first.getName(), second.getName());
+            Assertions.assertEquals(first.getValue(), second.getValue());
         }
     }
 
@@ -146,6 +143,12 @@ public class TestMessage implements Message {
         throw new IllegalStateException(ERROR_TEXT);
     }
 
+    @Nonnull
+    @Override
+    public List<Emote> getEmotes() {
+        throw new IllegalStateException(ERROR_TEXT);
+    }
+
     @Override
     public boolean mentionsEveryone() {
         throw new IllegalStateException(ERROR_TEXT);
@@ -159,12 +162,6 @@ public class TestMessage implements Message {
     @Nullable
     @Override
     public OffsetDateTime getTimeEdited() {
-        throw new IllegalStateException(ERROR_TEXT);
-    }
-
-    @Nonnull
-    @Override
-    public User getAuthor() {
         throw new IllegalStateException(ERROR_TEXT);
     }
 
@@ -247,12 +244,6 @@ public class TestMessage implements Message {
     @Nonnull
     @Override
     public Guild getGuild() {
-        throw new IllegalStateException(ERROR_TEXT);
-    }
-
-    @Nonnull
-    @Override
-    public List<Attachment> getAttachments() {
         throw new IllegalStateException(ERROR_TEXT);
     }
 
@@ -342,7 +333,6 @@ public class TestMessage implements Message {
     @Nonnull
     @Override
     public RestAction<Void> addReaction(@Nonnull String unicode) {
-        emotes.add(new EmoteImpl(1L, (JDAImpl) null).setName(unicode));
         expectedReactions--;
         return new TestRestAction<>(null);
     }
@@ -362,36 +352,31 @@ public class TestMessage implements Message {
     @Nonnull
     @Override
     public RestAction<Void> clearReactions(@Nonnull Emote emote) {
-        emotes.remove(emote);
-        return new TestRestAction<>(null);
+        throw new IllegalStateException(ERROR_TEXT);
     }
 
     @Nonnull
     @Override
     public RestAction<Void> removeReaction(@Nonnull Emote emote) {
-        emotes.remove(emote);
-        return new TestRestAction<>(null);
+        throw new IllegalStateException(ERROR_TEXT);
     }
 
     @Nonnull
     @Override
     public RestAction<Void> removeReaction(@Nonnull Emote emote, @Nonnull User user) {
-        emotes.remove(emote);
-        return new TestRestAction<>(null);
+        throw new IllegalStateException(ERROR_TEXT);
     }
 
     @Nonnull
     @Override
     public RestAction<Void> removeReaction(@Nonnull String unicode) {
-        emotes.removeIf(emote -> emote.getName().equals(unicode));
-        return new TestRestAction<>(null);
+        throw new IllegalStateException(ERROR_TEXT);
     }
 
     @Nonnull
     @Override
     public RestAction<Void> removeReaction(@Nonnull String unicode, @Nonnull User user) {
-        emotes.removeIf(emote -> emote.getName().equals(unicode));
-        return new TestRestAction<>(null);
+        throw new IllegalStateException(ERROR_TEXT);
     }
 
     @Nonnull
@@ -454,6 +439,6 @@ public class TestMessage implements Message {
 
     @Override
     public long getIdLong() {
-        throw new IllegalStateException(ERROR_TEXT);
+        return TestIDHandler.getId();
     }
 }

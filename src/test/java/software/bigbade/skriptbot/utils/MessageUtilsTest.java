@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import software.bigbade.skriptbot.testutils.TestIDHandler;
 
 import java.awt.Color;
 import java.util.function.Consumer;
@@ -44,13 +45,14 @@ class MessageUtilsTest {
 
     @Test
     void testGetErrorMessage() {
-        MessageEmbed embed = MessageUtils.getErrorMessage("title", "description");
+        String id = TestIDHandler.getId() + "";
+        MessageEmbed embed = MessageUtils.getErrorMessage(id, "title", "description");
         Assertions.assertEquals("title", embed.getTitle());
         Assertions.assertEquals("description", embed.getDescription());
         Assertions.assertEquals(Color.RED, embed.getColor());
         Assertions.assertNotNull(embed.getThumbnail());
         Assertions.assertEquals("https://i.imgur.com/AjlWaz5.png", embed.getThumbnail().getUrl());
         Assertions.assertNotNull(embed.getFooter());
-        Assertions.assertEquals("Error", embed.getFooter().getText());
+        Assertions.assertEquals("Error | " + id, embed.getFooter().getText());
     }
 }

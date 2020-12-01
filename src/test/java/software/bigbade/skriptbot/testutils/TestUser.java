@@ -1,5 +1,8 @@
 package software.bigbade.skriptbot.testutils;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.PrivateChannel;
@@ -11,14 +14,16 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class TestUser implements User {
     private static final String ERROR_TEXT = "Unimplemented test method!";
 
-    @Nonnull
-    @Override
-    public String getName() {
-        throw new IllegalStateException(ERROR_TEXT);
-    }
+    @Getter
+    private final String name;
+
+    @Setter
+    @Getter
+    private boolean isBot;
 
     @Nonnull
     @Override
@@ -58,11 +63,6 @@ public class TestUser implements User {
     @Nonnull
     @Override
     public List<Guild> getMutualGuilds() {
-        throw new IllegalStateException(ERROR_TEXT);
-    }
-
-    @Override
-    public boolean isBot() {
         throw new IllegalStateException(ERROR_TEXT);
     }
 

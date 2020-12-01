@@ -22,18 +22,19 @@ public final class HTTPUtilities {
             HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
             http.setRequestMethod("POST");
             http.setDoOutput(true);
-            StringJoiner sj = new StringJoiner("&");
+            StringJoiner joiner = new StringJoiner("&");
             for(Map.Entry<String,String> entry : arguments.entrySet()) {
-                sj.add(URLEncoder.encode(entry.getKey(), "UTF-8") + "="
+                joiner.add(URLEncoder.encode(entry.getKey(), "UTF-8") + "="
                         + URLEncoder.encode(entry.getValue(), "UTF-8"));
             }
-            byte[] out = sj.toString().getBytes(StandardCharsets.UTF_8);
+            byte[] out = joiner.toString().getBytes(StandardCharsets.UTF_8);
             http.setFixedLengthStreamingMode(out.length);
             http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
             http.connect();
             try(OutputStream os = http.getOutputStream()) {
                 os.write(out);
             }
+            http.getInputStream();
             return Optional.of(http.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();

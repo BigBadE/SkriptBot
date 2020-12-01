@@ -75,7 +75,7 @@ class ReactionListenerTest {
     static {
         ICommand command = new ICommand() {
             @Override
-            public void onCommand(TextChannel channel, String[] args) {
+            public void onCommand(TextChannel channel, String id, String[] args) {
                 //Not used for the test
             }
 
@@ -134,7 +134,7 @@ class ReactionListenerTest {
         when(REACTION_EMOTE.isEmoji()).thenReturn(false);
         handleRetrieveMessage(false);
         when(REACTED_MESSAGE.getAuthor()).thenReturn(SELF_USER);
-        System.out.println("Starting");
+
         handleRetrieveMessage(true);
         when(MOCK_HISTORY.isEmpty()).thenReturn(false);
         handleRetrieveMessage(true);

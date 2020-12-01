@@ -7,6 +7,7 @@ import com.github.cliftonlabs.json_simple.Jsonable;
 import com.github.cliftonlabs.json_simple.Jsoner;
 import lombok.SneakyThrows;
 import software.bigbade.skriptbot.SkriptBot;
+import software.bigbade.skriptbot.api.IDataFetcher;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,13 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class ResourceDataFetcher {
+public class ResourceDataFetcher implements IDataFetcher {
     private final Map<String, String> addons = new HashMap<>();
     private final String skUnityKey;
 
     public ResourceDataFetcher(String skUnityKey) {
         this.skUnityKey = skUnityKey;
-        JsonObject result = (JsonObject) readData("https://api.skripttools.net/v4/addons").orElseThrow(() -> new IllegalStateException("SkriptTools addon page is down!"));
+        JsonObject result = (JsonObject) readData("https://api.skripttools.net/v4/addons").orElseThrow(
+                () -> new IllegalStateException("SkriptTools addon get not successful"));
         if (!result.getBoolean(JsonKeys.SUCCESS.getKey())) {
             throw new IllegalStateException("SkriptTools addon get not successful");
         }
@@ -41,7 +43,7 @@ public class ResourceDataFetcher {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Jsonable> Optional<T> readData(String url) {
+    public <T extends Jsonable> Optional<T> readData(String url) {
         try (InputStreamReader reader = new InputStreamReader(getInputStream(url), StandardCharsets.UTF_8)) {
             return Optional.of((T) Jsoner.deserialize(reader));
         } catch (IOException | JsonException e) {

@@ -5,6 +5,7 @@ import com.github.cliftonlabs.json_simple.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import software.bigbade.skriptbot.api.ICommand;
 import software.bigbade.skriptbot.api.IDataFetcher;
@@ -26,7 +27,7 @@ public class AddonSearchCommand implements ICommand {
     private final String prefix;
 
     @Override
-    public void onCommand(TextChannel channel, String id, String[] args) {
+    public void onCommand(Member sender, TextChannel channel, String id, String[] args) {
         if (args.length == 0) {
             MessageUtils.sendEmbedWithReaction(channel,
                     MessageUtils.getErrorMessage(id, "No Addon Specified",

@@ -44,7 +44,7 @@ public class CommandListener extends ListenerAdapter {
                     String arg = tokenizer.nextToken();
                     args[i] = arg;
                 }
-                command.onCommand((TextChannel) event.getChannel(), event.getMessageId(), args);
+                command.onCommand(event.getMember(), (TextChannel) event.getChannel(), event.getMessageId(), args);
                 return;
             }
         }

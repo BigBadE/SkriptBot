@@ -46,5 +46,7 @@ public class Main {
         commandManager.registerCommand(new FormattingCommand());
         commandManager.registerCommand(new DownloadCommand());
         commandManager.registerCommand(new SucksCommand());
+        commandManager.registerCommand(new ListCommand());
+        commandManager.registerCommand(new PercentCommand());
     }
 }

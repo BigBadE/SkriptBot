@@ -2,6 +2,7 @@ package software.bigbade.skriptbot.commands;
 
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import software.bigbade.skriptbot.api.ICommand;
@@ -28,7 +29,7 @@ public class FormattingCommand implements ICommand {
     private final String[] aliases = new String[]{"format", "formatting"};
 
     @Override
-    public void onCommand(TextChannel channel, String id, String[] args) {
+    public void onCommand(Member sender, TextChannel channel, String id, String[] args) {
         MessageUtils.sendEmbedWithReaction(channel, new EmbedBuilder(FORMATTING_EMBED).setFooter("Format | " + id)
                 .build());
     }

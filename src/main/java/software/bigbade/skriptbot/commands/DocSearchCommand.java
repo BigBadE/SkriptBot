@@ -6,11 +6,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import software.bigbade.skriptbot.api.ICommand;
 import software.bigbade.skriptbot.api.IDataFetcher;
 import software.bigbade.skriptbot.utils.HTMLUtilities;
@@ -92,7 +88,7 @@ public class DocSearchCommand implements ICommand {
 
     @SneakyThrows(UnsupportedEncodingException.class)
     @Override
-    public void onCommand(TextChannel channel, String id, String[] args) {
+    public void onCommand(Member sender, TextChannel channel, String id, String[] args) {
         if (args.length == 0) {
             MessageUtils.sendEmbedWithReaction(channel, MessageUtils.getErrorMessage(id, "No Syntax Specified",
                     "Usage: **" + prefix + "doc subtext**"));

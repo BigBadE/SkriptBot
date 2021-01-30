@@ -1,12 +1,9 @@
 package software.bigbade.skriptbot.api;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 
 public interface ICommand {
-    void onCommand(TextChannel channel, String id, String[] args);
+    void onCommand(Member sender, TextChannel channel, String id, String[] args);
 
     default void onReaction(User reactor, Message command, Message message, MessageReaction.ReactionEmote emote) {}
 

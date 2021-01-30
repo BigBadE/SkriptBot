@@ -2,13 +2,7 @@ package software.bigbade.skriptbot;
 
 import software.bigbade.skriptbot.arguments.ArgumentParser;
 import software.bigbade.skriptbot.arguments.ProgramArguments;
-import software.bigbade.skriptbot.commands.AddonSearchCommand;
-import software.bigbade.skriptbot.commands.CommandManager;
-import software.bigbade.skriptbot.commands.DocSearchCommand;
-import software.bigbade.skriptbot.commands.DownloadCommand;
-import software.bigbade.skriptbot.commands.FormattingCommand;
-import software.bigbade.skriptbot.commands.PastebinCommand;
-import software.bigbade.skriptbot.commands.UUIDCommand;
+import software.bigbade.skriptbot.commands.*;
 import software.bigbade.skriptbot.utils.ResourceDataFetcher;
 
 import javax.security.auth.login.LoginException;
@@ -51,5 +45,8 @@ public class Main {
         commandManager.registerCommand(new UUIDCommand());
         commandManager.registerCommand(new FormattingCommand());
         commandManager.registerCommand(new DownloadCommand());
+        commandManager.registerCommand(new SucksCommand());
+        commandManager.registerCommand(new ListCommand());
+        commandManager.registerCommand(new PercentCommand());
     }
 }

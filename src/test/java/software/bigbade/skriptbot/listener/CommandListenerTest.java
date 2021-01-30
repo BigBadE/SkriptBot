@@ -11,14 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.bigbade.skriptbot.api.ICommand;
 import software.bigbade.skriptbot.listeners.CommandListener;
+import software.bigbade.skriptbot.testutils.TestChannel;
 import software.bigbade.skriptbot.testutils.TestUser;
 
 import java.util.Collections;
 
-import static org.mockito.Mockito.mock;
-
 class CommandListenerTest {
-    private static final JDA jda = mock(JDA.class);
+    private static final JDA jda = TestChannel.TEST_JDA;
     private static final CommandListener listener;
     private static boolean commandRan;
 

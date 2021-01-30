@@ -1,15 +1,12 @@
 package software.bigbade.skriptbot.listener;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,25 +14,24 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.ArgumentCaptor;
-import org.mockito.internal.verification.VerificationModeFactory;
 import software.bigbade.skriptbot.api.ICommand;
 import software.bigbade.skriptbot.listeners.ReactionListener;
+import software.bigbade.skriptbot.testutils.TestChannel;
+import software.bigbade.skriptbot.testutils.TestIDHandler;
+import software.bigbade.skriptbot.testutils.TestMessage;
+import software.bigbade.skriptbot.testutils.TestUser;
 import software.bigbade.skriptbot.utils.MessageUtils;
 
 import java.util.Collections;
-import java.util.function.Consumer;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ReactionListenerTest {
-    private static final JDA JDA = mock(JDA.class);
-    private static final SelfUser SELF_USER = mock(SelfUser.class);
+    private static final JDA JDA = TestChannel.TEST_JDA;
+
     private static final ReactionListener REACTION_LISTENER;
 
+    private static MessageReaction.ReactionEmote REACTION_EMOTE = MessageReaction.ReactionEmote.fromUnicode(
+            TestMessage.hexToName(MessageUtils.DELETE_REACTION), JDA);
     /**
      * Structure:
      * MessageReactionAddEvent
@@ -56,19 +52,15 @@ class ReactionListenerTest {
      *      - User (Author)
      *      - String (Content)
      */
-    private static final MessageReactionAddEvent REACTION_ADD_EVENT = mock(MessageReactionAddEvent.class);
-    private static final MessageReaction MESSAGE_REACTION = mock(MessageReaction.class);
-    private static final MessageReaction.ReactionEmote REACTION_EMOTE = mock(MessageReaction.ReactionEmote.class);
-    private static final User COMMAND_USER = mock(User.class);
-    @SuppressWarnings("unchecked")
-    private static final RestAction<Message> MESSAGE_QUEUE = mock(RestAction.class);
-    private static final Message REACTED_MESSAGE = mock(Message.class);
-    private static final TextChannel MESSAGE_CHANNEL = mock(TextChannel.class);
-    private static final MessageHistory.MessageRetrieveAction RETRIEVE_ACTION = mock(MessageHistory.MessageRetrieveAction.class);
-    private static final MessageHistory MOCK_HISTORY = mock(MessageHistory.class);
-    @SuppressWarnings("unchecked")
-    private static final AuditableRestAction<Void> DELETE_MESSAGE = mock(AuditableRestAction.class);
-    private static final Message LAST_MESSAGE = mock(Message.class);
+    private static final TestChannel MESSAGE_CHANNEL = new TestChannel();
+    private static final MessageReaction MESSAGE_REACTION = new MessageReaction(MESSAGE_CHANNEL, REACTION_EMOTE,
+            TestIDHandler.getId(), false, 1);
+    private static final MessageReactionAddEvent REACTION_ADD_EVENT = new MessageReactionAddEvent(JDA,
+            TestIDHandler.getId(), JDA.getSelfUser(), null, MESSAGE_REACTION, TestIDHandler.getId());
+
+    private static final TestUser COMMAND_USER = new TestUser("TestReactionUser");
+    private static final TestMessage REACTED_MESSAGE = new TestMessage("TestMessage", MESSAGE_CHANNEL);
+    private static TestMessage LAST_MESSAGE = new TestMessage(".testing", MESSAGE_CHANNEL);
 
     private static boolean addedReaction;
 
@@ -96,26 +88,11 @@ class ReactionListenerTest {
     @BeforeAll
     static void setupReactionTest() {
         REACTION_LISTENER.setJda(JDA);
-        //Set up event structure
-        when(REACTION_ADD_EVENT.getReaction()).thenReturn(MESSAGE_REACTION);
-        when(REACTION_ADD_EVENT.getUser()).thenReturn(COMMAND_USER);
-        when(MESSAGE_REACTION.getReactionEmote()).thenReturn(REACTION_EMOTE);
-        when(REACTION_ADD_EVENT.retrieveMessage()).thenReturn(MESSAGE_QUEUE);
-        when(MESSAGE_CHANNEL.getHistoryBefore(REACTED_MESSAGE, 1)).thenReturn(RETRIEVE_ACTION);
-        when(REACTED_MESSAGE.getChannel()).thenReturn(MESSAGE_CHANNEL);
-        when(REACTED_MESSAGE.delete()).thenReturn(DELETE_MESSAGE);
-        when(MOCK_HISTORY.getRetrievedHistory()).thenReturn(Collections.singletonList(LAST_MESSAGE));
-        when(LAST_MESSAGE.getContentStripped()).thenReturn(".testing");
-        when(LAST_MESSAGE.getAuthor()).thenReturn(COMMAND_USER);
 
-        //Things that need to be tested
-        when(JDA.getSelfUser()).thenReturn(SELF_USER);
-        when(COMMAND_USER.isBot()).thenReturn(true);
-        when(REACTION_ADD_EVENT.isFromGuild()).thenReturn(false);
-        when(REACTION_EMOTE.isEmoji()).thenReturn(true);
-        when(REACTED_MESSAGE.getAuthor()).thenReturn(COMMAND_USER);
-        when(MOCK_HISTORY.isEmpty()).thenReturn(true);
-        when(REACTION_EMOTE.getAsCodepoints()).thenReturn(MessageUtils.DELETE_REACTION);
+        MESSAGE_CHANNEL.setType(ChannelType.TEXT);
+
+        LAST_MESSAGE.setAuthor((TestUser) JDA.getSelfUser());
+        REACTED_MESSAGE.setAuthor(COMMAND_USER);
     }
 
     @BeforeEach
@@ -126,47 +103,38 @@ class ReactionListenerTest {
     @Order(1)
     @Test
     void onWrongMessageReactionAddTest() {
+        MESSAGE_CHANNEL.setType(ChannelType.PRIVATE);
+        COMMAND_USER.setBot(true);
+        REACTED_MESSAGE.setAuthor((TestUser) JDA.getSelfUser());
         REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
-        when(REACTION_ADD_EVENT.isFromGuild()).thenReturn(true);
+        MESSAGE_CHANNEL.setType(ChannelType.TEXT);
         REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
-        when(COMMAND_USER.isBot()).thenReturn(false);
-        REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
-        when(REACTION_EMOTE.isEmoji()).thenReturn(false);
-        handleRetrieveMessage(false);
-        when(REACTED_MESSAGE.getAuthor()).thenReturn(SELF_USER);
+        COMMAND_USER.setBot(false);
 
-        handleRetrieveMessage(true);
-        when(MOCK_HISTORY.isEmpty()).thenReturn(false);
-        handleRetrieveMessage(true);
-        verify(DELETE_MESSAGE).queue();
-        when(REACTION_EMOTE.getAsCodepoints()).thenReturn("U+0000");
-        handleRetrieveMessage(true);
-        when(LAST_MESSAGE.getContentStripped()).thenReturn("test");
-        handleRetrieveMessage(true);
+        REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
+        REACTED_MESSAGE.setAuthor(COMMAND_USER);
+
+        REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
+        MESSAGE_CHANNEL.setRetrievedMessage(LAST_MESSAGE);
+
+        REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
+        REACTED_MESSAGE.verify(true);
+
+        REACTION_EMOTE = MessageReaction.ReactionEmote.fromUnicode(TestMessage.hexToName("U+0000"), JDA);
+        REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
+        LAST_MESSAGE = new TestMessage("test", MESSAGE_CHANNEL);
+        LAST_MESSAGE.setAuthor((TestUser) JDA.getSelfUser());
+
+        REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
         Assertions.assertFalse(addedReaction);
     }
 
     @Order(2)
     @Test
     void onCorrectMessageReactionAddTest() {
-        when(LAST_MESSAGE.getContentStripped()).thenReturn(".test");
-        handleRetrieveMessage(true);
-        Assertions.assertTrue(addedReaction);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void handleRetrieveMessage(boolean handleHistory) {
-        ArgumentCaptor<Consumer<? super Message>> messageCaptor = ArgumentCaptor.forClass(Consumer.class);
-        ArgumentCaptor<Consumer<? super MessageHistory>> historyCaptor = null;
-        if(handleHistory) {
-            historyCaptor = ArgumentCaptor.forClass(Consumer.class);
-        }
+        LAST_MESSAGE = new TestMessage(".test", MESSAGE_CHANNEL);
+        LAST_MESSAGE.setAuthor((TestUser) JDA.getSelfUser());
         REACTION_LISTENER.onMessageReactionAdd(REACTION_ADD_EVENT);
-        verify(MESSAGE_QUEUE, VerificationModeFactory.atLeast(1)).queue(messageCaptor.capture());
-        messageCaptor.getValue().accept(REACTED_MESSAGE);
-        if(handleHistory) {
-            verify(RETRIEVE_ACTION, VerificationModeFactory.atLeast(1)).queue(historyCaptor.capture());
-            historyCaptor.getValue().accept(MOCK_HISTORY);
-        }
+        Assertions.assertTrue(addedReaction);
     }
 }

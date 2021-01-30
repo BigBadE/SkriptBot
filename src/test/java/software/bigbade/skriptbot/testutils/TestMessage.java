@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Formatter;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class TestMessage implements Message {
+    private static final Pattern UNICODE_SPLITTER = Pattern.compile("U+");
     private static final String ERROR_TEXT = "Unimplemented test method!";
 
     private final String text;
@@ -64,6 +66,19 @@ public class TestMessage implements Message {
         this.channel = channel;
         text = "";
         embeds.add(embed);
+    }
+
+    public static String hexToName(String hex) {
+        String[] split = UNICODE_SPLITTER.split(hex);
+        char[] hexes = new char[split.length-1];
+        int i = 0;
+        for(String found : split) {
+            if(found.isEmpty()) {
+                continue;
+            }
+            hexes[i++] = (char) Integer.parseInt(found, 16);
+        }
+        return new String(hexes);
     }
 
     public void addAttachment(Attachment attachment) { attachments.add(attachment); }

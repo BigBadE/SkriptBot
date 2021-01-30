@@ -38,6 +38,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class TestJDA implements JDA {
     private static final String ERROR_TEXT = "Unimplemented test method!";
+
+    private static final SelfUser TEST_SELF_USER = new TestSelfUser("TestSelfBot");
     @Nonnull
     @Override
     public Status getStatus() {
@@ -232,7 +234,7 @@ public class TestJDA implements JDA {
     @Nonnull
     @Override
     public SelfUser getSelfUser() {
-        throw new IllegalStateException(ERROR_TEXT);
+        return TEST_SELF_USER;
     }
 
     @Nonnull

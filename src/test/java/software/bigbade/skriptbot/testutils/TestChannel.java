@@ -44,6 +44,9 @@ public class TestChannel implements TextChannel {
     private final List<TestMessage> expectedMessages = new ArrayList<>();
 
     @Setter
+    private ChannelType type = ChannelType.TEXT;
+
+    @Setter
     private Message retrievedMessage = null;
 
     @Nonnull
@@ -89,7 +92,7 @@ public class TestChannel implements TextChannel {
     @Nonnull
     @Override
     public ChannelType getType() {
-        return ChannelType.TEXT;
+        return type;
     }
 
     @Override

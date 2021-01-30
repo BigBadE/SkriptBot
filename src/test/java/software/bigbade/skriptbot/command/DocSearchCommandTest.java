@@ -19,6 +19,8 @@ import software.bigbade.skriptbot.testutils.TestResourceDataFetcher;
 import software.bigbade.skriptbot.testutils.TestUser;
 import software.bigbade.skriptbot.utils.MessageUtils;
 
+import java.awt.Color;
+
 class DocSearchCommandTest {
     private static final TestResourceDataFetcher TEST_DATA_FETCHER = new TestResourceDataFetcher();
     private static final DocSearchCommand DOC_SEARCH_COMMAND = new DocSearchCommand(TEST_DATA_FETCHER, ".");
@@ -27,10 +29,11 @@ class DocSearchCommandTest {
     private static final User TEST_USER = new TestUser("Test User");
 
     private static final MessageReaction.ReactionEmote REACTION_EMOTE = MessageReaction.ReactionEmote.fromUnicode(
-            DocSearchCommand.getNumberEmote(0), TestChannel.TEST_JDA);
+            TestMessage.hexToName(DocSearchCommand.getNumberEmote(0)), TestChannel.TEST_JDA);
 
     private static final MessageEmbed TEST_EMBED = new EmbedBuilder().setTitle("Test Docs",
             "https://docs.skunity.com/syntax/search/Test+Docs")
+            .setColor(Color.YELLOW)
             .addField("Pattern", "```test[s]```", false)
             .addField("Description", "Test type", false)
             .addField("Example", "```unit tests > no unit tests```", false)
@@ -95,14 +98,14 @@ class DocSearchCommandTest {
     @Test
     void testCommandBasicDocs() {
         String id = TestIDHandler.getId() + "";
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(new EmbedBuilder(TEST_EMBED).setFooter(id).build(),
-                TEST_TEXT_CHANNEL));
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(new EmbedBuilder(TEST_EMBED)
+                .setFooter(DocSearchCommand.FOOTER + id).build(), TEST_TEXT_CHANNEL));
         DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[]{"test", "2"});
         TEST_TEXT_CHANNEL.verify();
 
         id = TestIDHandler.getId() + "";
-        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(new EmbedBuilder(TEST_MULTI_EMBED).setFooter(id).build(),
-                TEST_TEXT_CHANNEL));
+        TEST_TEXT_CHANNEL.expectMessage(new TestMessage(new EmbedBuilder(TEST_MULTI_EMBED)
+                .setFooter(DocSearchCommand.FOOTER + id).build(), TEST_TEXT_CHANNEL));
         DOC_SEARCH_COMMAND.onCommand(TEST_TEXT_CHANNEL, id, new String[]{"test", "3"});
         TEST_TEXT_CHANNEL.verify();
     }
@@ -114,8 +117,6 @@ class DocSearchCommandTest {
 
         TestMessage testMessage = new TestMessage(builder.build(), TEST_TEXT_CHANNEL);
         TestMessage commandMessage = new TestMessage(".d test 2", TEST_TEXT_CHANNEL);
-
-        DOC_SEARCH_COMMAND.onReaction(TEST_USER, commandMessage, testMessage, REACTION_EMOTE);
 
         testMessage.verify(false);
         commandMessage.verify(false);

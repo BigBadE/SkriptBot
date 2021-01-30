@@ -13,11 +13,13 @@ public class SucksCommand implements ICommand {
 
     @Override
     public void onCommand(Member sender, TextChannel channel, String id, String[] args) {
-        if (!sender.hasPermission(Permission.KICK_MEMBERS)) return;
+        if (!sender.hasPermission(Permission.KICK_MEMBERS) || args.length == 0) {
+            return;
+        }
         StringBuilder builder = new StringBuilder();
         for (String s : args) {
             builder.append(s).append(" ");
-            channel.sendMessage(builder.append("sucks by the way.").toString()).queue();
         }
+        channel.sendMessage(builder.append("sucks by the way.").toString()).queue();
     }
 }

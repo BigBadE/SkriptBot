@@ -2,6 +2,7 @@ package software.bigbade.skriptbot.commands;
 
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import software.bigbade.skriptbot.api.ICommand;
@@ -35,7 +36,7 @@ public class UUIDCommand implements ICommand {
     private final String[] aliases = new String[]{"uuid", "uuids"};
 
     @Override
-    public void onCommand(TextChannel channel, String id, String[] args) {
+    public void onCommand(Member sender, TextChannel channel, String id, String[] args) {
         MessageUtils.sendEmbedWithReaction(channel, new EmbedBuilder(UUID_EMBED).setFooter("UUID | " + id).build());
     }
 }

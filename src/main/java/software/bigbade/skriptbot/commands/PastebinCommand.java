@@ -3,6 +3,7 @@ package software.bigbade.skriptbot.commands;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import software.bigbade.skriptbot.api.ICommand;
@@ -22,7 +23,7 @@ public class PastebinCommand implements ICommand {
     private final String prefix;
 
     @Override
-    public void onCommand(TextChannel channel, String id, String[] args) {
+    public void onCommand(Member sender, TextChannel channel, String id, String[] args) {
         if(args.length != 1) {
             MessageUtils.sendEmbedWithReaction(
                     channel, MessageUtils.getErrorMessage(id, "Invalid Arguments",

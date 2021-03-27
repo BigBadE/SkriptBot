@@ -1,7 +1,9 @@
 plugins {
     id 'java'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
-    id 'com.github.johnrengelman.shadow' version '6.0.0'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    //Spotbugs
+    id "com.github.spotbugs" version "4.7.0"
 }
 
 group 'software.bigbade'
@@ -11,7 +13,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 lombok {
-    version = '1.18.12'
+    version = '1.18.18'
     sha256 = ''
 }
 
@@ -26,23 +28,21 @@ dependencies {
 
     //json.simple
     implementation 'com.github.cliftonlabs:json-simple:3.1.0'
+    //needed to fix lombok bug
+    implementation 'net.sf.trove4j:trove4j:3.0.3'
     //JDA for Discord bots
-    implementation('net.dv8tion:JDA:4.2.0_168') {
+    implementation('net.dv8tion:JDA:4.2.0_247') {
+        //noinspection GroovyAssignabilityCheck
         exclude group: 'org.jetbrains', module: 'annotations'
-        exclude group: 'org.slf4j', module: 'slf4j-api'
+        //noinspection GroovyAssignabilityCheck
         exclude group: 'com.google.code.gson', module: 'gson'
+        //noinspection GroovyAssignabilityCheck
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        //noinspection GroovyAssignabilityCheck
+        exclude group: 'net.sf.trove4j', module: 'trove4j'
     }
 
-    //Logging
-    implementation 'org.slf4j:slf4j-simple:1.8.0-beta4'
-
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
-
-    //Mocking
-    testImplementation 'org.mockito:mockito-junit-jupiter:3.5.10'
-    testImplementation 'org.mockito:mockito-inline:3.5.10'
-    testImplementation 'org.mockito:mockito-core:3.5.10'
 
     //Annotations
     testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
@@ -77,4 +77,13 @@ shadowJar {
     archiveClassifier.set('')
 
     minimize()
+}
+
+//noinspection GrUnresolvedAccess
+build.finalizedBy(shadowJar)
+
+jar {
+    manifest {
+        attributes 'Main-Class': "com.bigbade.skriptbot.Main"
+    }
 }

@@ -1,6 +1,7 @@
 package com.bigbade.skriptbot.command;
 
 import com.bigbade.skriptbot.BasicCommandTestSetup;
+import com.bigbade.skriptbot.DocsPage;
 import com.bigbade.skriptbot.commands.DocSearchCommand;
 import com.bigbade.skriptbot.testutils.TestJDA;
 import com.bigbade.skriptbot.testutils.TestMessage;
@@ -29,7 +30,7 @@ class DocSearchCommandTest extends BasicCommandTestSetup<DocSearchCommand> {
     private static TestUser TEST_USER = new TestUser("Test User");
 
     private static MessageReaction.ReactionEmote REACTION_EMOTE = MessageReaction.ReactionEmote.fromUnicode(
-            TestMessage.hexToName(DocSearchCommand.getNumberEmote(0)), TestJDA.TEST_JDA);
+            TestMessage.hexToName(DocsPage.getNumberEmote(0)), TestJDA.TEST_JDA);
 
     private static MessageEmbed TEST_EMBED = new EmbedBuilder().setTitle("Test Docs",
             "https://docs.skunity.com/syntax/search/Test+Docs")
@@ -97,14 +98,6 @@ class DocSearchCommandTest extends BasicCommandTestSetup<DocSearchCommand> {
     void testGetNumberFromString() {
         Assertions.assertEquals(10, DocSearchCommand.getNumberFromString("10."));
         Assertions.assertEquals(400, DocSearchCommand.getNumberFromString("400."));
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test
-    void testGetNumberFromEmote() {
-        Assertions.assertEquals("U+37U+fe0fU+20e3", DocSearchCommand.getNumberEmote(7));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> DocSearchCommand.getNumberEmote(-1));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> DocSearchCommand.getNumberEmote(11));
     }
 
     @Test

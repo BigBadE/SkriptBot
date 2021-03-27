@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class DownloadCommandTest extends BasicCommandTestSetup<DownloadCommand> {
-    private static final String TEST_JSON = "{\"tag_name\":\"test_version\",\"assets\":[{\"content_type\":\"wrong!\"," +
-            "\"url\":\"wrong url!\"},{\"content_type\":\"application\\/java-archive\",\"url\":\"correct!\"}]}";
+    private static final String TEST_JSON = "{\"tag_name\":\"test_version\",\"html_url\":\"correct!\"}";
 
     private final TestResourceDataFetcher dataFetcher = new TestResourceDataFetcher();
 

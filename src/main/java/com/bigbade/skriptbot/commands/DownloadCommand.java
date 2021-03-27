@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DownloadCommand implements ICommand {
     @Getter
-    private final List<String> aliases = Collections.unmodifiableList(Arrays.asList("down", "download", "downloads"));
+    private final List<String> aliases = Collections.unmodifiableList(Arrays.asList("dl", "down", "download", "downloads"));
     @Getter
     private EmbedBuilder embed;
     private long nextVersionCheck = 0L;
@@ -51,24 +51,15 @@ public class DownloadCommand implements ICommand {
                 .setColor(Color.GREEN).addField("1.7", "Recommended but **not supported**:\n\n[Njol, 2.2-SNAPSHOT]" +
                         "(https://github.com/Pikachu920/Skript/releases/download/2.2-SNAPSHOT/Skript-2.2-Njol.jar)", true)
                 .addField("1.8", "Recommended but **not supported**:\n\n"
-                        + "[Matocolotoe fork, " + matoVersion + "](" + getJarDownload(matoReturned) + ")", true)
+                        + "[Matocolotoe fork, " + matoVersion + "]("
+                        + matoReturned.getString(JsonKeys.HTML_URL.getKey()) + ")", true)
                 .addField("1.9+", "Long Term Support: \n\n"
                         + "[Bensku Fork 2.4.1](https://github.com/SkriptLang/Skript/releases/download/2.4.1/Skript.jar)\n\n"
                         + "Latest: \n\n"
-                        + "[Bensku's fork (" + latestVersion + ")](" + getJarDownload(latestReturned) + "), "
-                        + "but it might be unstable", true)
+                        + "[Bensku's fork (" + latestVersion + ")]("
+                        + latestReturned.getString(JsonKeys.HTML_URL.getKey()) + "), but it might be unstable", true)
                 .addField("Extra Info", "Note that all versions of Skript not by Njol are unofficial and " +
                         "their issues should be reported to their respective issue trackers", false)
                 .setFooter("Downloads | ");
-    }
-
-    private static String getJarDownload(JsonObject latestJson) {
-        for (Object object : latestJson.<JsonArray>getCollection(JsonKeys.ASSETS.getKey())) {
-            JsonObject asset = (JsonObject) object;
-            if (asset.getString(JsonKeys.CONTENT_TYPE.getKey()).equals("application/java-archive")) {
-                return asset.getString(JsonKeys.URL.getKey());
-            }
-        }
-        throw new IllegalStateException("No jar assets in release!");
     }
 }

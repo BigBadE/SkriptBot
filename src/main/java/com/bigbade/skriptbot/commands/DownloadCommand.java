@@ -48,8 +48,8 @@ public class DownloadCommand implements ICommand {
                         .orElseThrow(() -> new IllegalStateException("Could not fetch latest Skript release!"));
         String matoVersion = matoReturned.getString(JsonKeys.TAG_NAME.getKey());
         return new EmbedBuilder().setTitle("Downloading Skript")
-                .setColor(Color.GREEN).addField("1.7", "Recommended but **not supported**:\n\n[Njol, 2.2-SNAPSHOT]" +
-                        "(https://github.com/Pikachu920/Skript/releases/download/2.2-SNAPSHOT/Skript-2.2-Njol.jar)", true)
+                .setColor(Color.GREEN).addField("1.7", "Recommended but **not supported**:\n\n[Njol, 2.1.2]" +
+                        "(https://dev.bukkit.org/projects/skript/files/779542)", true)
                 .addField("1.8", "Recommended but **not supported**:\n\n"
                         + "[Matocolotoe fork, " + matoVersion + "]("
                         + matoReturned.getString(JsonKeys.HTML_URL.getKey()) + ")", true)

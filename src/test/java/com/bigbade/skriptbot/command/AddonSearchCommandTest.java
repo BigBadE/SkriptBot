@@ -70,7 +70,7 @@ class AddonSearchCommandTest extends BasicCommandTestSetup<AddonSearchCommand> {
         verify();
 
         TEST_DATA_FETCHER.addAddon("test addon", "test-addon");
-        TEST_DATA_FETCHER.setData((Jsonable) Jsoner.deserialize(TEST_JSON));
+        TEST_DATA_FETCHER.addData((Jsonable) Jsoner.deserialize(TEST_JSON));
 
         getTestChannel().expectMessage(new TestMessage(new EmbedBuilder(TEST_EMBED)
                 .setFooter("Data provided by Duetro's Skript API | " + sending.getId()).build(), getTestChannel()));

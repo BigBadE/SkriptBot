@@ -51,6 +51,7 @@ public class TestChannel implements TextChannel {
     @Nonnull
     @Override
     public MessageAction sendMessage(@Nonnull MessageEmbed embed) {
+        System.out.println(expectedMessages.get(expectedMessages.size()-1).getEmbeds().get(0).getTitle() + " vs " + embed.getTitle());
         TestMessage.assertEmbedsEqual(expectedMessages.get(expectedMessages.size()-1).getEmbeds().get(0), embed);
         expectedMessages.remove(expectedMessages.size()-1);
         return new TestMessageAction(embed, this);

@@ -9,14 +9,16 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Stack;
 
 public class TestResourceDataFetcher implements IDataFetcher {
     private final Map<String, String> addons = new HashMap<>();
     private final Map<String, JsonArray> results = new HashMap<>();
 
-    @Nullable
-    @Setter
-    private Jsonable data = null;
+    private Stack<Jsonable> data = new Stack<>();
+
+    public void addData(Jsonable adding) { data.add(adding); }
 
     public void addResult(String query, JsonArray result) {
         results.put(query, result);
@@ -39,7 +41,6 @@ public class TestResourceDataFetcher implements IDataFetcher {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Jsonable> Optional<T> readData(String url) {
-        T output = (T) data;
-        return Optional.ofNullable(output);
+        return Optional.ofNullable((T) data.pop());
     }
 }

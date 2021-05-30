@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class DownloadCommandTest extends BasicCommandTestSetup<DownloadCommand> {
     private static final String TEST_JSON = "{\"tag_name\":\"test_version\",\"html_url\":\"correct!\"}";
+    private static final String TEST_JSON_ARRAY = "[{\"tag_name\":\"test_version\",\"html_url\":\"correct!\"}]";
 
     private final TestResourceDataFetcher dataFetcher = new TestResourceDataFetcher();
 
@@ -35,7 +36,9 @@ class DownloadCommandTest extends BasicCommandTestSetup<DownloadCommand> {
     @SneakyThrows
     @Override
     public DownloadCommand getTestedCommand() {
-        dataFetcher.setData((Jsonable) Jsoner.deserialize(TEST_JSON));
+        dataFetcher.addData((Jsonable) Jsoner.deserialize(TEST_JSON));
+        dataFetcher.addData((Jsonable) Jsoner.deserialize(TEST_JSON_ARRAY));
+        dataFetcher.addData((Jsonable) Jsoner.deserialize(TEST_JSON));
         return new DownloadCommand(dataFetcher);
     }
 }

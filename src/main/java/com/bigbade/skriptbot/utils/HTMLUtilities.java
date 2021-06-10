@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public final class HTMLUtilities {
     private static final String[] NAMES = {"gt", "lt", "quot"};
-    private static final char[] CHARACTERS = {'<', '>', '"'};
+    private static final char[] CHARACTERS = {'>', '<', '"'};
 
     private static final HashMap<String, Character> LOOKUP_MAP;
 

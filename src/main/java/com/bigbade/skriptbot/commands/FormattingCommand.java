@@ -19,11 +19,11 @@ public class FormattingCommand implements ICommand {
                             "help them help you!", false))
             .addField(new MessageEmbed.Field("The Format", "\\`\\`\\`vb\n" +
                     "on chat:\n" +
-                    "broadcast \"This is how you format code!\"" +
+                    "    broadcast \"This is how you format code!\"" +
                     "\\`\\`\\`", true))
             .addField(new MessageEmbed.Field("How It Looks", "```vb\n" +
                     "on chat:\n" +
-                    "broadcast \"This is how you format code!\"\n" +
+                    "    broadcast \"This is how you format code!\"\n" +
                     "```", true))
             .addField(new MessageEmbed.Field("Extra Info", "On US keyboards, the grave character (`) is " +
                     "located above the tab key on the top left of the keyboard", false));

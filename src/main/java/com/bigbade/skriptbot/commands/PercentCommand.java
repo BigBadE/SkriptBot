@@ -17,8 +17,7 @@ public class PercentCommand implements ICommand {
             .setColor(Color.green).addField(new MessageEmbed.Field("When should percent signs be used in Skript?",
                     "In Skript, the purpose of surrounding an expression in % signs is letting Skript know "
                             + "you want it to be parsed as an expression and insert its value into the string "
-                            + "or variable you've put it in."
-                            + "organization a breeze. A list basically maps objects to their corresponding unique indices.", false))
+                            + "or variable you've put it in.", false))
             .addField(new MessageEmbed.Field("Incorrect usage",
                     "```yaml\n"
                             + "give dirt to %player%\n"

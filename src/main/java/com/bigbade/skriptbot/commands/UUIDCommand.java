@@ -21,19 +21,15 @@ public class UUIDCommand implements ICommand {
                             + "game name when `%player%` is used.", false))
             .addField(new MessageEmbed.Field("How to use",
                     "You use this in the same was as using `%player%`, just with "
-                            + "`'s uuid` on the end, so `player's uuid`!", false))
+                            + "`'s uuid` on the end, so `player's uuid`!\n" 
+                            + "You can also enable \"use player UUIDs in variable names\" in "
+                            + "your config.sk file. This causes all instances of `%player%` in "
+                            + "variable names to actually use the player's UUID instead.", false))
             .addField(new MessageEmbed.Field("Common situations which can use UUID's instead",
                     "```yaml\n" +
                             "{stats::%player%::kills} -> {stats::%player's uuid%::kills}\n"
                             + "{vanish::%player%} -> {vanish::%uuid of player%}\n"
-                            + "{generator::%player%::*} -> {generator::%player's uuid%::*}```", false))
-            .addField(new MessageEmbed.Field("Extra Notes",
-                    "There is currently an issue where you cannot use `{var::%{_p}'s uuid%}` in functions, "
-                            + "a workaround this is to use something similar to this: "
-                            + "```vb\n"
-                            + "function addKill(p: player):\n"
-                            + "   set {_u} to {_p}'s uuid\n"
-                            + "   add 1 to {stats::%{_u}%::kills}```", false));
+                            + "{generator::%player%::*} -> {generator::%player's uuid%::*}```", false));
     @Getter
     private final List<String> aliases = Collections.unmodifiableList(Arrays.asList("uuid", "uuids"));
 

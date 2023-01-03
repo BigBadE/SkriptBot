@@ -55,7 +55,7 @@ class DocSearchCommandTest extends BasicCommandTestSetup<DocSearchCommand> {
             "\"pattern\": \"test[s]\"," +
             "\"plugin\": \"\"," +
             "\"examples\": [{" +
-            "\"example\": \"unit tests &lt; no unit tests\"}]}");
+            "\"example\": \"unit tests &gt; no unit tests\"}]}");
 
     private static final JsonObject SECOND_OBJECT = getObject("{\"name\": \"Second Docs\"," +
             "\"doc\": \"types\"," +

@@ -8,7 +8,7 @@ class HTMLUtilitiesTest {
 
     @Test
     void testHTMLUnescaper() {
-        Assertions.assertEquals("\"<>", HTMLUtilities.unescapeHtml("&quot;&gt;&lt;"));
+        Assertions.assertEquals("\"<>", HTMLUtilities.unescapeHtml("&quot;&lt;&gt;"));
         Assertions.assertEquals(TEST_STRING, HTMLUtilities.unescapeHtml(TEST_STRING));
     }
 }

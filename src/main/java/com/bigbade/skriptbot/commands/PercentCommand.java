@@ -22,12 +22,16 @@ public class PercentCommand implements ICommand {
                     "```yaml\n"
                             + "give dirt to %player%\n"
                             + "send \"Hey there player\" to %arg-1%\n"
-                            + "kill %{_entity}%```", false))
+                            + "kill %{_entity}%```\n"
+                            + "Here, the % signs are not inside strings or variable names and should "
+                            + "therefore be removed.", false))
             .addField(new MessageEmbed.Field("Correct usage",
                     "```yaml\n" +
                             "broadcast \"%player% has joined!\"\n"
                             + "send \"%{_variable::*}%\" to player\n"
-                            + "set {_variable::%uuid of player%} to 10```", false));
+                            + "set {_variable::%uuid of player%} to 10```\n"
+                            + "Here, the % signs are being use properly, as a means to put expressions "
+                            + "inside strings and variable names.", false));
     @Getter
     private final List<String> aliases = Collections.unmodifiableList(Arrays.asList("percent", "percents", "%"));
 

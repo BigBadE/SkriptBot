@@ -28,9 +28,9 @@ public class ListCommand implements ICommand {
             .addField(new MessageEmbed.Field("Indices and values",
                     "As already mentioned, lists have indices and values. For instance, in "
                             + "`set {money::%uuid of player%} to 100` the index is the uuid of the player and the value is 100. "
-                            + "We can also access all the values at once by using ::*.\n"
+                            + "We can also access all the values at once by using ``::*``.\n"
                             + "This last part means we can replace a lot of common loops with simple lists, "
-                            + "like `send \"You're on team red!\" to {team-red::*}` instead of looping "
+                            + "like ``send \"You're on team red!\" to {team-red::*}`` instead of looping "
                             + "through all players and checking if each one is on team red." , false))
             .addField(new MessageEmbed.Field("Common situations which can use lists instead",
                     "```yaml\n" +

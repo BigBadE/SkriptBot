@@ -17,11 +17,11 @@ public class FormattingCommand implements ICommand {
             .setColor(Color.GREEN.getRGB()).addField(new MessageEmbed.Field("Why?",
                     "Code blocks make it easier for helpers to identify potential errors -- " +
                             "help them help you!", false))
-            .addField(new MessageEmbed.Field("The Format", "\\`\\`\\`vb\n" +
+            .addField(new MessageEmbed.Field("The Format", "\\`\\`\\`applescript\n" +
                     "on chat:\n" +
                     "    broadcast \"This is how you format code!\"" +
                     "\\`\\`\\`", true))
-            .addField(new MessageEmbed.Field("How It Looks", "```vb\n" +
+            .addField(new MessageEmbed.Field("How It Looks", "```applescript\n" +
                     "on chat:\n" +
                     "    broadcast \"This is how you format code!\"\n" +
                     "```", true))
